@@ -888,7 +888,7 @@
         }
 
         function getOCRErrorMessage(errorMessage, errorDetails = '') {
-            const message = errorMessage.toLowerCase();
+            const message = (errorMessage || '').toLowerCase();
             
             if (message.includes('file size')) {
                 return 'File quá lớn. Vui lòng bật tính năng tự động giảm chất lượng ảnh hoặc chọn ảnh nhỏ hơn.';
@@ -944,7 +944,7 @@
             }
 
             getTextBtn.disabled = false;
-            getTextBtn.innerHTML = `Get Text`;
+            getTextBtn.innerHTML = `<span class="btn-text">Chuyển đổi trang hiện tại</span>`;
         }
 
         async function handleConvertAll() {
@@ -975,7 +975,7 @@
             URL.revokeObjectURL(url);
 
             convertAllBtn.disabled = false;
-            convertAllBtn.innerHTML = `Convert All to TXT`;
+            convertAllBtn.innerHTML = `<span class="btn-text">Chuyển đổi tất cả (xuất file)</span>`;
             showStatus('Đã xuất file TXT thành công.', 'info');
         }
 
