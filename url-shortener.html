@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rút gọn Link - URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .url-input.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .shorten-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .shorten-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .shorten-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            border: 2px solid #e9ecef;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .url-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .shortened-url {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #17a2b8;
+        }
+
+        .original-url {
+            font-size: 0.9rem;
+            color: #6c757d;
+            word-break: break-all;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .features h3 {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .back-btn {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 2rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .url-display {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+            }
+
+            .copy-btn {
+                align-self: center;
+                width: fit-content;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                transform: translateY(-100px);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        ← Quay lại trang chủ
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Rút gọn Link</h1>
+            <p>Chuyển đổi URL dài thành link ngắn gọn và dễ chia sẻ</p>
+        </div>
+
+        <div class="main-card">
+            <div class="input-group">
+                <label for="original-url">Nhập URL cần rút gọn:</label>
+                <input 
+                    type="url" 
+                    id="original-url" 
+                    class="url-input" 
+                    placeholder="https://example.com/very-long-url-that-needs-shortening"
+                    autocomplete="url"
+                >
+            </div>
+
+            <button id="shorten-btn" class="shorten-btn">
+                Rút gọn Link
+            </button>
+
+            <div id="error-message" class="error-message">
+                <strong>Lỗi:</strong> <span id="error-text"></span>
+            </div>
+
+            <div id="result-section" class="result-section">
+                <div class="result-title">
+                    ✅ Link đã được rút gọn thành công!
+                </div>
+                
+                <div class="url-display">
+                    <div class="shortened-url" id="shortened-url"></div>
+                    <button id="copy-btn" class="copy-btn">Copy</button>
+                </div>
+                
+                <div class="original-url">
+                    <strong>Link gốc:</strong> <span id="original-url-display"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>✨ Tính năng nổi bật</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <span>⚡</span>
+                    <span>Rút gọn nhanh chóng</span>
+                </div>
+                <div class="feature-item">
+                    <span>🔒</span>
+                    <span>An toàn và bảo mật</span>
+                </div>
+                <div class="feature-item">
+                    <span>📋</span>
+                    <span>Sao chép một cú click</span>
+                </div>
+                <div class="feature-item">
+                    <span>🌐</span>
+                    <span>Hoạt động với mọi URL</span>
+                </div>
+                <div class="feature-item">
+                    <span>📱</span>
+                    <span>Tương thích mobile</span>
+                </div>
+                <div class="feature-item">
+                    <span>🆓</span>
+                    <span>Hoàn toàn miễn phí</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification will be inserted here -->
+
+    <script>
+        // DOM Elements
+        const originalUrlInput = document.getElementById('original-url');
+        const shortenBtn = document.getElementById('shorten-btn');
+        const resultSection = document.getElementById('result-section');
+        const shortenedUrlElement = document.getElementById('shortened-url');
+        const originalUrlDisplay = document.getElementById('original-url-display');
+        const copyBtn = document.getElementById('copy-btn');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+
+        // State
+        let isLoading = false;
+        let currentShortenedUrl = '';
+
+        // Validate URL
+        function isValidUrl(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : '❌'}</span>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+            resultSection.classList.remove('show');
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // Show loading state
+        function setLoading(loading) {
+            isLoading = loading;
+            shortenBtn.disabled = loading;
+            
+            if (loading) {
+                shortenBtn.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Đang rút gọn...</span>
+                    </div>
+                `;
+            } else {
+                shortenBtn.innerHTML = 'Rút gọn Link';
+            }
+        }
+
+        // Shorten URL using shrtco.de API
+        async function shortenUrl(originalUrl) {
+            try {
+                setLoading(true);
+                hideError();
+
+                // Validate URL
+                if (!isValidUrl(originalUrl)) {
+                    throw new Error('URL không hợp lệ. Vui lòng nhập URL đầy đủ bao gồm http:// hoặc https://');
+                }
+
+                // Try multiple URL shortening services
+                let shortenedUrl = null;
+                let serviceName = '';
+                
+                // Try TinyURL first (no API key required)
+                try {
+                    const tinyUrlApi = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(originalUrl)}`;
+                    const tinyResponse = await fetch(tinyUrlApi);
+                    
+                    if (tinyResponse.ok) {
+                        const tinyResult = await tinyResponse.text();
+                        if (tinyResult && tinyResult.startsWith('https://tinyurl.com/')) {
+                            shortenedUrl = tinyResult;
+                            serviceName = 'TinyURL';
+                        }
+                    }
+                } catch (tinyError) {
+                    console.log('TinyURL failed:', tinyError);
+                }
+                
+                // If TinyURL fails, try is.gd
+                if (!shortenedUrl) {
+                    try {
+                        const isgdApi = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(originalUrl)}`;
+                        const isgdResponse = await fetch(isgdApi);
+                        
+                        if (isgdResponse.ok) {
+                            const isgdResult = await isgdResponse.text();
+                            if (isgdResult && isgdResult.startsWith('https://is.gd/')) {
+                                shortenedUrl = isgdResult;
+                                serviceName = 'is.gd';
+                            }
+                        }
+                    } catch (isgdError) {
+                        console.log('is.gd failed:', isgdError);
+                    }
+                }
+                
+                // If both fail, try v.gd
+                if (!shortenedUrl) {
+                    try {
+                        const vgdApi = `https://v.gd/create.php?format=simple&url=${encodeURIComponent(originalUrl)}`;
+                        const vgdResponse = await fetch(vgdApi);
+                        
+                        if (vgdResponse.ok) {
+                            const vgdResult = await vgdResponse.text();
+                            if (vgdResult && vgdResult.startsWith('https://v.gd/')) {
+                                shortenedUrl = vgdResult;
+                                serviceName = 'v.gd';
+                            }
+                        }
+                    } catch (vgdError) {
+                        console.log('v.gd failed:', vgdError);
+                    }
+                }
+                
+                if (!shortenedUrl) {
+                    throw new Error('Tất cả các dịch vụ rút gọn URL đều không khả dụng. Vui lòng thử lại sau.');
+                }
+
+                // Display result
+                currentShortenedUrl = shortenedUrl;
+                shortenedUrlElement.textContent = currentShortenedUrl;
+                originalUrlDisplay.textContent = originalUrl;
+                
+                resultSection.classList.add('show');
+                
+                // Reset copy button
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.remove('copied');
+
+                showToast(`Link đã được rút gọn thành công qua ${serviceName}!`);
+
+            } catch (error) {
+                console.error('Shorten URL error:', error);
+                
+                let errorMessage = 'Có lỗi xảy ra khi rút gọn URL';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Không thể kết nối đến dịch vụ rút gọn URL. Vui lòng kiểm tra kết nối mạng.';
+                } else if (error.message.includes('URL không hợp lệ')) {
+                    errorMessage = error.message;
+                } else if (error.message.includes('API Error: 400')) {
+                    errorMessage = 'URL không hợp lệ hoặc không thể truy cập được.';
+                } else if (error.message.includes('API Error: 429')) {
+                    errorMessage = 'Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.';
+                } else if (error.message.includes('API Error: 500')) {
+                    errorMessage = 'Dịch vụ rút gọn URL đang gặp sự cố. Vui lòng thử lại sau.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                showError(errorMessage);
+                showToast(errorMessage, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            try {
+                await navigator.clipboard.writeText(currentShortenedUrl);
+                
+                // Update button state
+                copyBtn.textContent = 'Đã copy!';
+                copyBtn.classList.add('copied');
+                
+                showToast('Đã sao chép link rút gọn!');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Copy failed:', error);
+                
+                // Fallback for older browsers
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = currentShortenedUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    copyBtn.textContent = 'Đã copy!';
+                    copyBtn.classList.add('copied');
+                    showToast('Đã sao chép link rút gọn!');
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                    
+                } catch (fallbackError) {
+                    showToast('Không thể sao chép. Vui lòng copy thủ công.', 'error');
+                }
+            }
+        }
+
+        // Event Listeners
+        shortenBtn.addEventListener('click', () => {
+            if (isLoading) return;
+            
+            const url = originalUrlInput.value.trim();
+            if (!url) {
+                originalUrlInput.focus();
+                showError('Vui lòng nhập URL cần rút gọn');
+                return;
+            }
+            
+            shortenUrl(url);
+        });
+
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // Enter key support
+        originalUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isLoading) {
+                shortenBtn.click();
+            }
+        });
+
+        // Clear error when user starts typing
+        originalUrlInput.addEventListener('input', () => {
+            hideError();
+            originalUrlInput.classList.remove('error');
+        });
+
+        // Add error class to input when there's an error
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+            resultSection.classList.remove('show');
+            originalUrlInput.classList.add('error');
+        }
+
+        // Focus on input when page loads
+        window.addEventListener('load', () => {
+            originalUrlInput.focus();
+        });
+    </script>
+</body>
+</html>
