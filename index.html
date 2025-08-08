@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Utilities - Tiện ích Văn phòng</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #10a37f;
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .dropdown-content.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 0 0.5rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f0f8f5;
+            color: #10a37f;
+        }
+
+        /* Dropdown hover behavior will be handled by JavaScript */
+
+        .dropdown > a::after {
+            content: " ▼";
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Banner */
+        .banner {
+            background: url('Source/Banner.png') center center / cover no-repeat;
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .greeting {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .name-input {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: center;
+            width: 300px;
+            outline: none;
+            border-bottom: 3px solid rgba(255,255,255,0.5);
+            transition: border-color 0.3s ease;
+        }
+
+        .name-input:focus {
+            border-bottom-color: white;
+        }
+
+        .name-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .edit-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .edit-icon:hover {
+            opacity: 1;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .info-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .info-card p {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .weather-location {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 3rem;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0,0,0,0.1);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .greeting, .name-input, .name-display {
+                font-size: 1.8rem;
+            }
+
+            .banner {
+                padding: 1.2rem 1rem;
+            }
+
+            .banner > div {
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .dropdown-content {
+                min-width: 320px;
+                right: -50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .header {
+                padding: 0.8rem 1rem;
+            }
+
+            .dropdown-content {
+                min-width: 280px;
+                right: -80px;
+            }
+
+            .greeting, .name-input, .name-display {
+                font-size: 1.5rem;
+            }
+
+            .banner {
+                padding: 1rem;
+            }
+
+            .banner > div {
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <img src="Source/1. Logo.jpg" alt="Logo">
+                <span class="logo-text">Utilities</span>
+            </a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home">Trang chủ</a></li>
+                    <li class="dropdown">
+                        <a href="#features">Tính năng</a>
+                        <div class="dropdown-content" id="dropdown-menu">
+                            <a href="pdf-editor.html">📝 PDF Editor</a>
+                            <a href="image-to-pdf-scanner.html">📄 Chuyển đổi ảnh thành PDF</a>
+                            <a href="excel-cleaner.html">🗑️ Dọn rác file Excel</a>
+                            <a href="cccd-generator.html">🖼️ Resize ảnh CCCD/Hộ chiếu</a>
+                            <a href="converter.html">📝 Markdown to HTML Converter</a>
+                            <a href="QR-in.html">💳 Tạo QR nhận tiền</a>
+                            <a href="ocr-extract.html">🧩 Trích xuất văn bản OCR</a>
+                            <a href="qr-generator.html">🔳 Tạo QR Đa Dụng</a>
+                            <!-- <a href="extract-video.html">🎥 Tách Hình / Tiếng Từ Video</a> -->
+                            <!-- <a href="audio-tools.html">🎧 Ghép / Cắt Âm Thanh</a> -->
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <section class="banner" id="home">
+        <div class="banner-content">
+            <!-- Split banner into two halves -->
+            <div style="display: flex; gap: 2rem; align-items: center; max-width: 1000px; margin: 0 auto;">
+                <!-- Left side: User greeting -->
+                <div style="flex: 1; text-align: left;">
+                    <div id="greeting-container">
+                        <div id="name-input-container" style="display: none;">
+                            <input type="text" id="name-input" class="name-input" placeholder="Bạn tên là gì?" maxlength="20" style="text-align: left; width: 100%; max-width: 300px;">
+                        </div>
+                        <div id="name-display-container" style="display: none;">
+                            <div class="name-display" style="justify-content: flex-start;">
+                                <span id="name-display-text"></span>
+                                <span class="edit-icon" id="edit-name">✏️</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side: Weather -->
+                <div style="flex: 1;">
+                    <div class="info-card" style="margin: 0; background: rgba(255,255,255,0.15); backdrop-filter: blur(15px);">
+                        <h3 style="margin-bottom: 0.8rem;">🌤️ Thời tiết <span id="weather-location" class="weather-location"></span></h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <!-- Left side: Today's weather -->
+                            <div style="flex: 1; text-align: center;">
+                                <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; opacity: 0.8;">
+                                    Hôm nay <span id="current-date-inline" style="font-size: 0.75rem; opacity: 0.7;"></span>
+                                </div>
+                                <div id="weather-info" style="font-size: 1rem; font-weight: 600;">Đang tải...</div>
+                            </div>
+                            
+                            <!-- Right side: Daily forecast -->
+                            <div style="flex: 1; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 1rem;">
+                                <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; opacity: 0.8;">Daily Forecast</div>
+                                <div id="forecast-content" style="font-size: 0.75rem;">Đang tải dự báo...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h2 class="section-title">🚀 Các tính năng của chúng tôi</h2>
+        
+        <div class="features-grid">
+            <a href="pdf-editor.html" class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">PDF Editor</h3>
+                <p class="feature-description">
+                    Chỉnh sửa file PDF và ảnh trực quan. Hỗ trợ crop, xoay, sắp xếp trang,
+                    chèn thêm trang và xuất PDF với nhiều tùy chọn nâng cao.
+                </p>
+            </a>
+            
+            <a href="image-to-pdf-scanner.html" class="feature-card">
+                <div class="feature-icon">📄</div>
+                <h3 class="feature-title">Chuyển đổi ảnh thành PDF</h3>
+                <p class="feature-description">
+                    Chuyển ảnh thường thành file PDF scan chuyên nghiệp. Hỗ trợ batch upload,
+                    tự động căn chỉnh và tạo PDF với giao diện như máy scan thật.
+                </p>
+            </a>
+            
+            <a href="excel-cleaner.html" class="feature-card">
+                <div class="feature-icon">🗑️</div>
+                <h3 class="feature-title">Dọn rác file Excel</h3>
+                <p class="feature-description">
+                    Làm sạch file Excel có dung lượng lớn bất thường. Tự động loại bỏ dữ liệu thừa,
+                    named ranges lỗi thời, broken links và xuất file tối ưu.
+                </p>
+            </a>
+            
+            <a href="cccd-generator.html" class="feature-card">
+                <div class="feature-icon">🖼️</div>
+                <h3 class="feature-title">Resize ảnh CCCD/Hộ chiếu</h3>
+                <p class="feature-description">
+                    Tạo ảnh CCCD chuẩn từ ảnh chân dung thường. Tự động căn chỉnh khuôn mặt,
+                    đổi nền và xuất ảnh đúng kích thước theo tiêu chuẩn.
+                </p>
+            </a>
+            
+            <a href="converter.html" class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">Markdown to HTML Converter</h3>
+                <p class="feature-description">
+                    Chuyển đổi file Markdown sang HTML với giao diện đẹp mắt giống ChatGPT.
+                    Hỗ trợ đầy đủ các tính năng định dạng và syntax highlighting.
+                </p>
+            </a>
+            
+            <a href="QR-in.html" class="feature-card">
+                <div class="feature-icon">💳</div>
+                <h3 class="feature-title">Tạo QR nhận tiền</h3>
+                <p class="feature-description">
+                    Tạo mã QR chuyển khoản nhanh chóng và tiện lợi. Hỗ trợ tất cả các ngân hàng
+                    tại Việt Nam với giao diện thân thiện và lưu thông tin tự động.
+                </p>
+            </a>
+            
+            <a href="ocr-extract.html" class="feature-card">
+                <div class="feature-icon">🧩</div>
+                <h3 class="feature-title">Trích xuất văn bản OCR</h3>
+                <p class="feature-description">
+                    Trích xuất văn bản từ file ảnh hoặc PDF (tối đa 3 trang) sử dụng công nghệ OCR.
+                    Hỗ trợ xem trước, sắp xếp và xuất ra file DOCX.
+                </p>
+            </a>
+            <a href="qr-generator.html" class="feature-card">
+                <div class="feature-icon">🔳</div>
+                <h3 class="feature-title">Tạo QR Đa Dụng</h3>
+                <p class="feature-description">
+                    Tạo mã QR cho link, Vcard, Wi-Fi với nhiều tùy chọn tùy chỉnh màu sắc, logo và style.
+                </p>
+            </a>
+            <!-- <a href="extract-video.html" class="feature-card">
+                <div class="feature-icon">🎥</div>
+                <h3 class="feature-title">Tách Hình / Tiếng Từ Video</h3>
+                <p class="feature-description">
+                    Tách audio và video từ file video. Xuất ra file MP3 hoặc video không có âm thanh.
+                </p>
+            </a> -->
+            <!-- <a href="audio-tools.html" class="feature-card">
+                <div class="feature-icon">🎧</div>
+                <h3 class="feature-title">Ghép / Cắt Âm Thanh</h3>
+                <p class="feature-description">
+                    Ghép nhiều file audio thành một hoặc cắt một đoạn âm thanh từ file.
+                </p>
+            </a> -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 SHS Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
+    </footer>
+
+    <script>
+        // Lấy tên từ localStorage
+        let userName = localStorage.getItem('userName');
+        
+        // Elements
+        const nameInputContainer = document.getElementById('name-input-container');
+        const nameDisplayContainer = document.getElementById('name-display-container');
+        const nameInput = document.getElementById('name-input');
+        const nameDisplayText = document.getElementById('name-display-text');
+        const editNameBtn = document.getElementById('edit-name');
+        
+        // Hiển thị greeting
+        function showGreeting() {
+            if (userName) {
+                nameDisplayText.textContent = `Xin chào ${userName}`;
+                nameDisplayContainer.style.display = 'flex';
+                nameInputContainer.style.display = 'none';
+            } else {
+                nameInputContainer.style.display = 'block';
+                nameDisplayContainer.style.display = 'none';
+            }
+        }
+        
+        // Lưu tên
+        function saveName() {
+            const name = nameInput.value.trim();
+            if (name) {
+                // Viết hoa tất cả các chữ cái đầu từ
+                const formattedName = name.split(' ').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                ).join(' ');
+                localStorage.setItem('userName', formattedName);
+                userName = formattedName;
+                showGreeting();
+            }
+        }
+        
+        // Event listeners
+        nameInput.addEventListener('blur', saveName);
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveName();
+            }
+        });
+        
+        editNameBtn.addEventListener('click', function() {
+            nameInput.value = userName;
+            nameInputContainer.style.display = 'block';
+            nameDisplayContainer.style.display = 'none';
+            nameInput.focus();
+        });
+        
+        // Hiển thị ngày tháng inline
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                day: 'numeric',
+                month: 'numeric'
+            };
+            const dateStr = now.toLocaleDateString('vi-VN', options);
+            const inlineDateElement = document.getElementById('current-date-inline');
+            if (inlineDateElement) {
+                inlineDateElement.textContent = `(${dateStr})`;
+            }
+        }
+        
+        // Lấy thông tin thời tiết với One Call API
+        async function getWeather() {
+            try {
+                if (!navigator.geolocation) {
+                    document.getElementById('weather-info').textContent = 'Trình duyệt không hỗ trợ định vị';
+                    document.getElementById('forecast-content').textContent = 'Trình duyệt không hỗ trợ định vị';
+                    return;
+                }
+
+                // Kiểm tra permission state từ localStorage
+                const locationPermission = localStorage.getItem('locationPermission');
+                const savedLocation = localStorage.getItem('savedLocation');
+                
+                // Nếu đã từ chối permission trước đó, không hỏi lại
+                if (locationPermission === 'denied') {
+                    document.getElementById('weather-info').textContent = 'Quyền truy cập vị trí đã bị từ chối';
+                    document.getElementById('forecast-content').textContent = 'Không thể lấy dự báo thời tiết';
+                    return;
+                }
+                
+                // Nếu có vị trí đã lưu và chưa quá 30 phút, sử dụng luôn
+                if (savedLocation && locationPermission === 'granted') {
+                    const locationData = JSON.parse(savedLocation);
+                    const now = Date.now();
+                    const locationAge = now - locationData.timestamp;
+                    
+                    // Sử dụng vị trí đã lưu nếu chưa quá 30 phút (1800000 ms)
+                    if (locationAge < 1800000) {
+                        console.log('Sử dụng vị trí đã lưu:', locationData);
+                        await fetchWeatherData(locationData.latitude, locationData.longitude);
+                        return;
+                    }
+                }
+
+                // Kiểm tra permission hiện tại trước khi request
+                if (navigator.permissions) {
+                    try {
+                        const permission = await navigator.permissions.query({name: 'geolocation'});
+                        console.log('Current permission state:', permission.state);
+                        
+                        if (permission.state === 'denied') {
+                            localStorage.setItem('locationPermission', 'denied');
+                            document.getElementById('weather-info').textContent = 'Quyền truy cập vị trí đã bị từ chối';
+                            document.getElementById('forecast-content').textContent = 'Không thể lấy dự báo thời tiết';
+                            return;
+                        }
+                        
+                        if (permission.state === 'granted') {
+                            localStorage.setItem('locationPermission', 'granted');
+                        }
+                    } catch (permError) {
+                        console.log('Permission API không khả dụng:', permError);
+                    }
+                }
+
+                // Request location
+                navigator.geolocation.getCurrentPosition(
+                    async function(position) {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Lưu permission state và vị trí
+                        localStorage.setItem('locationPermission', 'granted');
+                        localStorage.setItem('savedLocation', JSON.stringify({
+                            latitude,
+                            longitude,
+                            timestamp: Date.now()
+                        }));
+                        
+                        console.log('Vị trí mới được lấy và lưu:', { latitude, longitude });
+                        await fetchWeatherData(latitude, longitude);
+                    },
+                    function(error) {
+                        console.error('Geolocation error:', error);
+                        
+                        // Lưu trạng thái từ chối permission
+                        if (error.code === error.PERMISSION_DENIED) {
+                            localStorage.setItem('locationPermission', 'denied');
+                            document.getElementById('weather-info').textContent = 'Quyền truy cập vị trí đã bị từ chối';
+                            document.getElementById('forecast-content').textContent = 'Không thể lấy dự báo thời tiết';
+                        } else {
+                            document.getElementById('weather-info').textContent = 'Không thể lấy vị trí - ' + error.message;
+                            document.getElementById('forecast-content').textContent = 'Không thể lấy vị trí';
+                        }
+                    },
+                    {
+                        timeout: 10000,
+                        enableHighAccuracy: false,
+                        maximumAge: 300000 // 5 phút
+                    }
+                );
+            } catch (error) {
+                console.error('Weather function error:', error);
+                document.getElementById('weather-info').textContent = 'Không thể tải thời tiết - ' + error.message;
+                document.getElementById('forecast-content').textContent = 'Lỗi tải dự báo';
+            }
+        }
+        
+        // Tách riêng function fetch weather data
+        async function fetchWeatherData(latitude, longitude) {
+            try {
+                // Sử dụng OpenWeatherMap One Call API
+                const apiKey = '56c6e90bfff82043ae93482cab965c0f';
+                
+                // Gọi cả current weather và One Call API
+                const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=vi`;
+                const oneCallUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=vi&exclude=minutely,alerts`;
+                
+                console.log('Đang gọi Current Weather API:', currentWeatherUrl);
+                console.log('Đang gọi One Call API:', oneCallUrl);
+                
+                // Gọi current weather API
+                const currentResponse = await fetch(currentWeatherUrl);
+                console.log('Current weather response status:', currentResponse.status);
+                
+                if (currentResponse.ok) {
+                    const currentData = await currentResponse.json();
+                    console.log('Current weather data:', currentData);
+                    
+                    if (currentData.main && currentData.weather && currentData.weather[0]) {
+                        const temp = Math.round(currentData.main.temp);
+                        const description = currentData.weather[0].description;
+                        const location = currentData.name || 'Vị trí hiện tại';
+                        
+                        // Cập nhật địa điểm
+                        document.getElementById('weather-location').textContent = `(${location})`;
+                        
+                        // Cập nhật thông tin thời tiết hiện tại
+                        document.getElementById('weather-info').innerHTML = `
+                            <div>${temp}°C - ${description}</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.2rem;">Nhiệt độ cảm nhận: ${Math.round(currentData.main.feels_like)}°C</div>
+                        `;
+                    }
+                }
+                
+                // Gọi One Call API cho daily forecast
+                try {
+                    const oneCallResponse = await fetch(oneCallUrl);
+                    console.log('One Call response status:', oneCallResponse.status);
+                    
+                    if (oneCallResponse.ok) {
+                        const oneCallData = await oneCallResponse.json();
+                        console.log('One Call data:', oneCallData);
+                        
+                        if (oneCallData.daily && oneCallData.daily.length > 0) {
+                            displayDailyForecast(oneCallData.daily.slice(0, 3)); // Hiển thị 3 ngày đầu
+                        } else {
+                            document.getElementById('forecast-content').textContent = 'Không có dữ liệu dự báo';
+                        }
+                    } else {
+                        console.error('One Call API Error:', oneCallResponse.status);
+                        // Fallback: sử dụng 5-day forecast API miễn phí
+                        await getFiveDayForecast(latitude, longitude, apiKey);
+                    }
+                } catch (oneCallError) {
+                    console.error('One Call API Error:', oneCallError);
+                    // Fallback: sử dụng 5-day forecast API miễn phí
+                    await getFiveDayForecast(latitude, longitude, apiKey);
+                }
+            } catch (error) {
+                console.error('Fetch weather data error:', error);
+                document.getElementById('weather-info').textContent = 'Lỗi tải thời tiết - ' + error.message;
+                document.getElementById('forecast-content').textContent = 'Lỗi tải dự báo';
+            }
+        }
+        
+        // Fallback: Sử dụng 5-day forecast API (miễn phí)
+        async function getFiveDayForecast(latitude, longitude, apiKey) {
+            try {
+                const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=vi`;
+                console.log('Đang gọi 5-day Forecast API:', forecastUrl);
+                
+                const response = await fetch(forecastUrl);
+                console.log('5-day forecast response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('5-day forecast data:', data);
+                    
+                    if (data.list && data.list.length > 0) {
+                        // Lấy dự báo cho 3 ngày (mỗi ngày lấy forecast lúc 12:00)
+                        const dailyForecasts = [];
+                        const processedDates = new Set();
+                        
+                        for (const item of data.list) {
+                            const date = new Date(item.dt * 1000);
+                            const dateStr = date.toDateString();
+                            
+                            if (!processedDates.has(dateStr) && dailyForecasts.length < 3) {
+                                dailyForecasts.push({
+                                    dt: item.dt,
+                                    temp: {
+                                        min: item.main.temp_min,
+                                        max: item.main.temp_max
+                                    },
+                                    weather: item.weather,
+                                    clouds: item.clouds,
+                                    pop: item.pop, // Probability of precipitation
+                                    humidity: item.main.humidity
+                                });
+                                processedDates.add(dateStr);
+                            }
+                        }
+                        
+                        displayDailyForecastFallback(dailyForecasts);
+                    } else {
+                        document.getElementById('forecast-content').textContent = 'Không có dữ liệu dự báo';
+                    }
+                } else {
+                    console.error('5-day Forecast API Error:', response.status);
+                    document.getElementById('forecast-content').textContent = `Lỗi API dự báo: ${response.status}`;
+                }
+            } catch (error) {
+                console.error('5-day Forecast Error:', error);
+                document.getElementById('forecast-content').textContent = 'Lỗi tải dự báo';
+            }
+        }
+        
+        // Hiển thị daily forecast từ One Call API
+        function displayDailyForecast(dailyData) {
+            let forecastHtml = '';
+            
+            for (let i = 0; i < Math.min(3, dailyData.length); i++) {
+                const day = dailyData[i];
+                const date = new Date(day.dt * 1000);
+                const dayName = i === 0 ? 'Hôm nay' : date.toLocaleDateString('vi-VN', { weekday: 'short' });
+                
+                const tempMin = Math.round(day.temp.min);
+                const tempMax = Math.round(day.temp.max);
+                const description = day.weather[0].description;
+                const clouds = day.clouds || 0;
+                const uvi = day.uvi || 0;
+                const pop = Math.round((day.pop || 0) * 100); // Probability of precipitation
+                
+                forecastHtml += `
+                    <div style="margin-bottom: 0.4rem; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="font-weight: 500; font-size: 0.85rem;">${dayName}</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.1rem;">
+                            ${tempMin}°/${tempMax}°C, ${description}
+                        </div>
+                        <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 0.1rem;">
+                            ☁️${clouds}% | ☀️${uvi.toFixed(1)} | 🌧️${pop}%
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('forecast-content').innerHTML = forecastHtml;
+        }
+        
+        // Hiển thị daily forecast từ 5-day API (fallback)
+        function displayDailyForecastFallback(dailyData) {
+            let forecastHtml = '';
+            
+            for (let i = 0; i < Math.min(3, dailyData.length); i++) {
+                const day = dailyData[i];
+                const date = new Date(day.dt * 1000);
+                const dayName = i === 0 ? 'Hôm nay' : date.toLocaleDateString('vi-VN', { weekday: 'short' });
+                
+                const tempMin = Math.round(day.temp.min);
+                const tempMax = Math.round(day.temp.max);
+                const description = day.weather[0].description;
+                const clouds = day.clouds?.all || 0;
+                const pop = Math.round((day.pop || 0) * 100);
+                const humidity = day.humidity || 0;
+                
+                forecastHtml += `
+                    <div style="margin-bottom: 0.4rem; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="font-weight: 500; font-size: 0.85rem;">${dayName}</div>
+                        <div style="font-size: 0.75rem; margin-top: 0.1rem;">
+                            ${tempMin}°/${tempMax}°C, ${description}
+                        </div>
+                        <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 0.1rem;">
+                            ☁️${clouds}% | 💧${humidity}% | 🌧️${pop}%
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('forecast-content').innerHTML = forecastHtml;
+        }
+        
+        // Test API key với cả current weather và One Call API
+        async function testWeatherAPI() {
+            try {
+                const apiKey = '56c6e90bfff82043ae93482cab965c0f';
+                // Test với tọa độ Hà Nội
+                const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=21.0285&lon=105.8542&appid=${apiKey}&units=metric&lang=vi`;
+                const oneCallUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=21.0285&lon=105.8542&appid=${apiKey}&units=metric&lang=vi&exclude=minutely,alerts`;
+                
+                console.log('Testing Current Weather API với Hà Nội:', currentWeatherUrl);
+                const currentResponse = await fetch(currentWeatherUrl);
+                console.log('Current weather test response status:', currentResponse.status);
+                
+                console.log('Testing One Call API với Hà Nội:', oneCallUrl);
+                const oneCallResponse = await fetch(oneCallUrl);
+                console.log('One Call test response status:', oneCallResponse.status);
+                
+                if (currentResponse.ok) {
+                    const currentData = await currentResponse.json();
+                    console.log('Test current weather data:', currentData);
+                    
+                    if (oneCallResponse.ok) {
+                        const oneCallData = await oneCallResponse.json();
+                        console.log('Test One Call data:', oneCallData);
+                        console.log('✅ Cả hai API đều hoạt động');
+                        return { current: true, oneCall: true };
+                    } else {
+                        console.log('⚠️ Current Weather OK, One Call API lỗi:', oneCallResponse.status);
+                        return { current: true, oneCall: false };
+                    }
+                } else {
+                    const errorText = await currentResponse.text();
+                    console.error('Current Weather API Test Error:', currentResponse.status, errorText);
+                    return { current: false, oneCall: false };
+                }
+            } catch (error) {
+                console.error('API Test Error:', error);
+                return { current: false, oneCall: false };
+            }
+        }
+        
+        // Kiểm tra trạng thái API key
+        async function checkAPIKeyStatus() {
+            const apiKey = '56c6e90bfff82043ae93482cab965c0f';
+            
+            // Test với endpoint đơn giản nhất
+            const testUrl = `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${apiKey}`;
+            
+            try {
+                console.log('Checking API key status...');
+                const response = await fetch(testUrl);
+                
+                if (response.ok) {
+                    console.log('✅ API key hoạt động bình thường');
+                    
+                    // Test thêm One Call API
+                    const testResults = await testWeatherAPI();
+                    if (testResults.oneCall) {
+                        console.log('✅ One Call API cũng hoạt động');
+                        document.getElementById('forecast-content').innerHTML = '<div style="opacity: 0.7;">Sẵn sàng tải dự báo...</div>';
+                    } else {
+                        console.log('⚠️ One Call API không khả dụng, sẽ dùng 5-day forecast');
+                        document.getElementById('forecast-content').innerHTML = '<div style="opacity: 0.7;">Sẽ dùng API dự báo 5 ngày...</div>';
+                    }
+                    
+                    return true;
+                } else if (response.status === 401) {
+                    console.log('❌ API key không hợp lệ hoặc chưa được kích hoạt');
+                    document.getElementById('weather-info').textContent = 'API key chưa được kích hoạt (có thể cần 2-3 giờ)';
+                    document.getElementById('forecast-content').textContent = 'API key chưa sẵn sàng';
+                    return false;
+                } else if (response.status === 429) {
+                    console.log('❌ Quá nhiều request');
+                    document.getElementById('weather-info').textContent = 'Quá nhiều request, thử lại sau';
+                    document.getElementById('forecast-content').textContent = 'Quá nhiều request';
+                    return false;
+                } else {
+                    console.log(`❌ Lỗi API: ${response.status}`);
+                    document.getElementById('weather-info').textContent = `Lỗi API: ${response.status}`;
+                    document.getElementById('forecast-content').textContent = `Lỗi API: ${response.status}`;
+                    return false;
+                }
+            } catch (error) {
+                console.log('❌ Lỗi mạng:', error);
+                document.getElementById('weather-info').textContent = 'Lỗi kết nối mạng';
+                document.getElementById('forecast-content').textContent = 'Lỗi kết nối mạng';
+                return false;
+            }
+        }
+        
+        // Khởi tạo
+        showGreeting();
+        updateDateTime();
+        
+        // Kiểm tra API key trước
+        checkAPIKeyStatus().then(isValid => {
+            if (isValid) {
+                getWeather();
+            }
+        });
+        
+
+        
+        // Cập nhật thời gian mỗi phút
+        setInterval(updateDateTime, 60000);
+
+        // Dropdown menu functionality with delay
+        let dropdownTimeout;
+        const dropdown = document.querySelector('.dropdown');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        if (dropdown && dropdownMenu) {
+            dropdown.addEventListener('mouseenter', function() {
+                clearTimeout(dropdownTimeout);
+                dropdownMenu.classList.add('show');
+            });
+
+            dropdown.addEventListener('mouseleave', function() {
+                dropdownTimeout = setTimeout(function() {
+                    dropdownMenu.classList.remove('show');
+                }, 800); // 0.8 second delay
+            });
+
+            // Keep menu open when hovering over the dropdown content
+            dropdownMenu.addEventListener('mouseenter', function() {
+                clearTimeout(dropdownTimeout);
+            });
+
+            dropdownMenu.addEventListener('mouseleave', function() {
+                dropdownTimeout = setTimeout(function() {
+                    dropdownMenu.classList.remove('show');
+                }, 800);
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dọn rác file Excel - Office Utilities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+
+        .back-btn {
+            background: #10a37f;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #0d8a6b;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .page-description {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed #10a37f;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            background: #f8fffe;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: #f0fffe;
+            border-color: #0d8a6b;
+        }
+
+        .upload-area.dragover {
+            background: #e6fffa;
+            border-color: #0d8a6b;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #10a37f;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #10a37f;
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #0d8a6b;
+        }
+
+        /* Processing Section */
+        .processing-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .processing-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10a37f, #1a7f64);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .processing-status {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-size {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .size-reduction {
+            color: #10a37f;
+            font-weight: 600;
+        }
+
+        .no-reduction {
+            color: #666;
+            font-style: italic;
+        }
+
+        .download-btn {
+            background: #10a37f;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #0d8a6b;
+        }
+
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .download-all-btn {
+            background: #ff8700;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+            transition: background 0.3s ease;
+        }
+
+        .download-all-btn:hover {
+            background: #e67600;
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-card h3 {
+            color: #10a37f;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #c33;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #363;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #363;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+
+            .results-table {
+                font-size: 0.9rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="Source/1. Logo.jpg" alt="Logo">
+                <span class="logo-text">Utilities</span>
+            </a>
+            <a href="index.html" class="back-btn">← Về trang chủ</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="page-title">📄 Dọn rác file Excel</h1>
+        <p class="page-description">
+            Làm sạch file Excel một cách an toàn bằng cách chỉ xóa định dạng từ các ô trống
+            và loại bỏ named ranges không hợp lệ. Bảo toàn hoàn toàn dữ liệu gốc.
+        </p>
+
+        <!-- Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
+                <h3>🛡️ An toàn tuyệt đối</h3>
+                <p>Chỉ xóa định dạng từ ô trống, không động đến dữ liệu và công thức</p>
+            </div>
+            <div class="info-card">
+                <h3>🔗 Xử lý Named Ranges</h3>
+                <p>Xóa các Named Range không hợp lệ hoặc có tham chiếu trống</p>
+            </div>
+            <div class="info-card">
+                <h3>✅ Bảo toàn dữ liệu</h3>
+                <p>Giữ nguyên 100% dữ liệu, công thức và cấu trúc file gốc</p>
+            </div>
+            <div class="info-card">
+                <h3>📊 Báo cáo chi tiết</h3>
+                <p>Hiển thị dung lượng trước/sau và tỷ lệ giảm cho từng file</p>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Kéo thả file Excel vào đây</div>
+                <div class="upload-hint">Hỗ trợ .xlsx, .xls - Có thể chọn nhiều file cùng lúc</div>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Chọn file Excel
+                </button>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".xlsx,.xls">
+            </div>
+        </div>
+
+        <!-- Processing Section -->
+        <div class="processing-section" id="processingSection">
+            <h2 class="processing-title">Đang xử lý file...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="processing-status" id="processingStatus">Đang phân tích file...</div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2 class="results-title">Kết quả xử lý</h2>
+            <table class="results-table" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Tên file</th>
+                        <th>Dung lượng gốc</th>
+                        <th>Dung lượng sau xử lý</th>
+                        <th>Giảm (%)</th>
+                        <th>Trạng thái</th>
+                        <th>Tải về</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                </tbody>
+            </table>
+            <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
+                <button class="download-all-btn" id="downloadAllBtn" onclick="downloadAllFiles()">
+                    📦 Tải tất cả dưới dạng ZIP
+                </button>
+                <button class="upload-btn" id="resetBtn" onclick="resetPage()" style="background: #666; padding: 1rem 2rem;">
+                    🔄 Làm mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SheetJS for Excel processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Include JSZip for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        let processedFiles = [];
+        let originalFiles = [];
+
+        // File input and drag & drop handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const processingSection = document.getElementById('processingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const progressFill = document.getElementById('progressFill');
+        const processingStatus = document.getElementById('processingStatus');
+
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+            );
+            if (files.length > 0) {
+                processFiles(files);
+            } else {
+                showError('Vui lòng chọn file Excel (.xlsx hoặc .xls)');
+            }
+        });
+
+        // File input change event
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                processFiles(files);
+            }
+        });
+
+        // Process files function
+        async function processFiles(files) {
+            if (files.length === 0) return;
+
+            // Reset arrays
+            processedFiles = [];
+            originalFiles = [...files];
+
+            // Show processing section
+            processingSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+
+            // Clear results table
+            document.getElementById('resultsTableBody').innerHTML = '';
+
+            let processedCount = 0;
+            const totalFiles = files.length;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                try {
+                    // Update progress
+                    const progress = (i / totalFiles) * 100;
+                    progressFill.style.width = progress + '%';
+                    processingStatus.textContent = `Đang xử lý: ${file.name} (${i + 1}/${totalFiles})`;
+
+                    // Process the file
+                    const result = await processExcelFile(file);
+                    processedFiles.push(result);
+                    processedCount++;
+
+                } catch (error) {
+                    console.error('Error processing file:', file.name, error);
+                    processedFiles.push({
+                        originalFile: file,
+                        fileName: file.name,
+                        originalSize: file.size,
+                        processedSize: file.size,
+                        reduction: 0,
+                        status: 'Lỗi: ' + error.message,
+                        processedBlob: null,
+                        hasError: true
+                    });
+                }
+            }
+
+            // Complete processing
+            progressFill.style.width = '100%';
+            processingStatus.textContent = `Hoàn thành xử lý ${processedCount}/${totalFiles} file`;
+
+            // Show results after a short delay
+            setTimeout(() => {
+                showResults();
+            }, 500);
+        }
+
+        // Process individual Excel file (Conservative approach)
+        async function processExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Create a deep copy for processing
+                        let processedWorkbook = JSON.parse(JSON.stringify(workbook));
+                        let changesMade = false;
+                        let processingLog = [];
+
+                        // Process each worksheet - only clean formatting from empty cells
+                        Object.keys(processedWorkbook.Sheets).forEach(sheetName => {
+                            const worksheet = processedWorkbook.Sheets[sheetName];
+                            
+                            // Clean formatting from empty cells only (preserve all data)
+                            const cleanResult = cleanEmptyFormatting(worksheet);
+                            if (cleanResult.changed) {
+                                changesMade = true;
+                                processingLog.push(`${sheetName}: Xóa định dạng ${cleanResult.cleanedCells} ô trống`);
+                            }
+                        });
+
+                        // Remove unused named ranges (if they exist)
+                        if (processedWorkbook.Workbook && processedWorkbook.Workbook.Names) {
+                            const originalNameCount = processedWorkbook.Workbook.Names.length;
+                            processedWorkbook.Workbook.Names = processedWorkbook.Workbook.Names.filter(name => {
+                                // Keep named ranges that have valid references
+                                return name && name.Name && name.Ref && name.Ref.trim() !== '';
+                            });
+                            
+                            const removedNames = originalNameCount - processedWorkbook.Workbook.Names.length;
+                            if (removedNames > 0) {
+                                changesMade = true;
+                                processingLog.push(`Xóa ${removedNames} named range không hợp lệ`);
+                            }
+                        }
+
+                        // Generate processed file only if changes were made
+                        let processedBlob = null;
+                        let processedSize = file.size;
+                        
+                        if (changesMade) {
+                            const processedData = XLSX.write(processedWorkbook, {
+                                bookType: 'xlsx',
+                                type: 'array',
+                                compression: true
+                            });
+                            
+                            processedBlob = new Blob([processedData], {
+                                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                            });
+                            processedSize = processedBlob.size;
+                        }
+
+                        const originalSize = file.size;
+                        const reduction = originalSize > 0 ? ((originalSize - processedSize) / originalSize * 100) : 0;
+
+                        let status = 'Đã xử lý';
+                        if (!changesMade || reduction < 1) {
+                            status = 'File đã tối ưu sẵn';
+                        } else if (processingLog.length > 0) {
+                            status = processingLog.join('; ');
+                        }
+
+                        resolve({
+                            originalFile: file,
+                            fileName: file.name,
+                            originalSize: originalSize,
+                            processedSize: processedSize,
+                            reduction: Math.max(0, reduction),
+                            status: status,
+                            processedBlob: processedBlob,
+                            hasError: false
+                        });
+
+                    } catch (error) {
+                        reject(new Error('Không thể xử lý file: ' + error.message));
+                    }
+                };
+
+                reader.onerror = function() {
+                    reject(new Error('Không thể đọc file'));
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Clean formatting from empty cells only (preserve all data and formulas)
+        function cleanEmptyFormatting(worksheet) {
+            if (!worksheet || !worksheet['!ref']) {
+                return { changed: false, cleanedCells: 0 };
+            }
+
+            const range = XLSX.utils.decode_range(worksheet['!ref']);
+            let cleanedCells = 0;
+            let changed = false;
+
+            // Go through all cells in the range
+            for (let row = range.s.r; row <= range.e.r; row++) {
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                    const cell = worksheet[cellAddress];
+                    
+                    // If cell exists but has no actual value or formula
+                    if (cell) {
+                        const hasValue = cell.v !== undefined && cell.v !== null && cell.v !== '';
+                        const hasFormula = cell.f && cell.f.trim() !== '';
+                        
+                        // Only remove cells that have no value AND no formula (just formatting)
+                        if (!hasValue && !hasFormula) {
+                            // Check if cell has only formatting (style, type, etc.)
+                            const hasOnlyFormatting = (cell.s || cell.t) && !hasValue && !hasFormula;
+                            
+                            if (hasOnlyFormatting) {
+                                delete worksheet[cellAddress];
+                                cleanedCells++;
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Only recalculate range if we actually removed cells
+            if (changed) {
+                let newMaxRow = -1;
+                let newMaxCol = -1;
+                
+                // Find the actual data boundaries (including formulas)
+                for (let row = range.s.r; row <= range.e.r; row++) {
+                    for (let col = range.s.c; col <= range.e.c; col++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+                        const cell = worksheet[cellAddress];
+                        
+                        if (cell) {
+                            const hasValue = cell.v !== undefined && cell.v !== null && cell.v !== '';
+                            const hasFormula = cell.f && cell.f.trim() !== '';
+                            
+                            if (hasValue || hasFormula) {
+                                newMaxRow = Math.max(newMaxRow, row);
+                                newMaxCol = Math.max(newMaxCol, col);
+                            }
+                        }
+                    }
+                }
+                
+                // Update range only if we found actual data
+                if (newMaxRow >= 0 && newMaxCol >= 0) {
+                    const newRange = {
+                        s: { r: range.s.r, c: range.s.c },
+                        e: { r: newMaxRow, c: newMaxCol }
+                    };
+                    worksheet['!ref'] = XLSX.utils.encode_range(newRange);
+                }
+            }
+
+            return { changed, cleanedCells };
+        }
+
+        // Show results
+        function showResults() {
+            const tableBody = document.getElementById('resultsTableBody');
+            tableBody.innerHTML = '';
+
+            processedFiles.forEach((result, index) => {
+                const row = document.createElement('tr');
+                
+                const sizeReduction = result.reduction;
+                const reductionClass = sizeReduction > 5 ? 'size-reduction' : 'no-reduction';
+                const reductionText = sizeReduction > 1 ? `${sizeReduction.toFixed(1)}%` : 'Không đáng kể';
+
+                row.innerHTML = `
+                    <td>${result.fileName}</td>
+                    <td class="file-size">${formatFileSize(result.originalSize)}</td>
+                    <td class="file-size">${formatFileSize(result.processedSize)}</td>
+                    <td class="${reductionClass}">${reductionText}</td>
+                    <td>${result.status}</td>
+                    <td>
+                        <button class="download-btn" 
+                                onclick="downloadFile(${index})" 
+                                ${!result.processedBlob ? 'disabled' : ''}>
+                            ${result.processedBlob ? '📥 Tải về' : '📄 Gốc'}
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Hide processing and show results
+            processingSection.style.display = 'none';
+            resultsSection.style.display = 'block';
+
+            // Enable/disable download all button - only enable if there are individual download buttons enabled
+            const hasDownloadableFiles = processedFiles.some(f => f.processedBlob !== null);
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            downloadAllBtn.disabled = !hasDownloadableFiles;
+            
+            if (!hasDownloadableFiles) {
+                downloadAllBtn.style.opacity = '0.5';
+                downloadAllBtn.style.cursor = 'not-allowed';
+            } else {
+                downloadAllBtn.style.opacity = '1';
+                downloadAllBtn.style.cursor = 'pointer';
+            }
+        }
+
+        // Download individual file
+        function downloadFile(index) {
+            const result = processedFiles[index];
+            const blob = result.processedBlob || result.originalFile;
+            const fileName = result.processedBlob ? 
+                result.fileName.replace(/\.(xlsx|xls)$/i, '_cleaned.$1') : 
+                result.fileName;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Download all files as ZIP - only include files that have individual download buttons enabled
+        async function downloadAllFiles() {
+            const zip = new JSZip();
+            let hasFiles = false;
+
+            processedFiles.forEach(result => {
+                // Only include files that have processedBlob (individual download button is enabled)
+                if (result.processedBlob) {
+                    const fileName = result.fileName.replace(/\.(xlsx|xls)$/i, '_cleaned.$1');
+                    zip.file(fileName, result.processedBlob);
+                    hasFiles = true;
+                }
+            });
+
+            if (hasFiles) {
+                try {
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const url = URL.createObjectURL(zipBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'excel_files_cleaned.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    showError('Không thể tạo file ZIP: ' + error.message);
+                }
+            } else {
+                showError('Không có file nào để tải về');
+            }
+        }
+
+        // Reset page to default state
+        function resetPage() {
+            // Clear all data
+            processedFiles = [];
+            originalFiles = [];
+            
+            // Hide processing and results sections
+            processingSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Clear results table
+            document.getElementById('resultsTableBody').innerHTML = '';
+            
+            // Reset progress bar
+            progressFill.style.width = '0%';
+            processingStatus.textContent = 'Đang phân tích file...';
+            
+            // Remove any error/success messages
+            const messages = document.querySelectorAll('.error-message, .success-message');
+            messages.forEach(msg => msg.remove());
+            
+            // Show success message
+            showSuccess('Đã làm mới trang thành công');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(successDiv, container.firstChild);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

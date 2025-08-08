@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo QR Đa Dụng</title>
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        .header {
+            width: 100%;
+            max-width: 800px;
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+        .back-btn {
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .back-btn:hover {
+            background: #1a7f64;
+        }
+        .main-content {
+            background: white;
+            border-radius: 0 0 16px 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        .qr-container {
+            display: flex;
+            gap: 2rem;
+        }
+        .qr-form {
+            flex: 1;
+        }
+        .qr-preview {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #canvas {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background: #1a7f64;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">
+            <img src="Source/1. Logo.jpg" alt="Logo">
+            <span class="logo-text">Utilities</span>
+        </a>
+        <a href="index.html" class="back-btn">← Quay lại</a>
+    </header>
+    <div class="main-content">
+        <h1 class="page-title">🔳 Tạo QR Đa Dụng</h1>
+        <div class="qr-container">
+            <div class="qr-form">
+                <div class="form-group">
+                    <label for="qr-type">Loại QR</label>
+                    <select id="qr-type">
+                        <option value="link">Link/Text</option>
+                        <option value="vcard">Vcard</option>
+                        <option value="wifi">Wi-Fi</option>
+                    </select>
+                </div>
+                <div id="form-fields"></div>
+                <div class="form-group">
+                    <label for="image-upload">Logo</label>
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+            </div>
+            <div class="qr-preview">
+                <div id="canvas"></div>
+                <button id="download-btn">Tải xuống</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const qrTypeSelect = document.getElementById('qr-type');
+        const formFields = document.getElementById('form-fields');
+        const downloadBtn = document.getElementById('download-btn');
+        const canvas = document.getElementById('canvas');
+        const imageUpload = document.getElementById('image-upload');
+
+        let qrCode;
+
+        const qrCodeOptions = {
+            width: 300,
+            height: 300,
+            type: "svg",
+            data: " ",
+            dotsOptions: {
+                color: "#6a1a4c",
+                type: "rounded"
+            },
+            cornersSquareOptions: {
+                color: "#000000",
+                type: "extra-rounded"
+            },
+            backgroundOptions: {
+                color: "#ffffff",
+            },
+            imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 1
+            },
+            qrOptions: {
+                errorCorrectionLevel: 'H',
+                mode: 'Byte'
+            },
+            qrOptions: {
+                errorCorrectionLevel: 'H',
+                mode: 'Byte'
+            },
+            qrOptions: {
+                errorCorrectionLevel: 'H',
+                mode: 'Byte'
+            }
+        };
+
+        const linkTemplate = `
+            <div class="form-group">
+                <label for="text-input">Nội dung</label>
+                <textarea id="text-input" rows="4" maxlength="500" required></textarea>
+            </div>
+        `;
+
+        const vcardTemplate = `
+            <div class="form-group">
+                <label for="vcard-name">Họ tên</label>
+                <input type="text" id="vcard-name" required>
+            </div>
+            <div class="form-group">
+                <label for="vcard-phone">Số điện thoại</label>
+                <input type="tel" id="vcard-phone" pattern="[0-9]+">
+            </div>
+            <div class="form-group">
+                <label for="vcard-email">Email</label>
+                <input type="email" id="vcard-email">
+            </div>
+            <div class="form-group">
+                <label for="vcard-company">Công ty</label>
+                <input type="text" id="vcard-company">
+            </div>
+            <div class="form-group">
+                <label for="vcard-title">Chức danh</label>
+                <input type="text" id="vcard-title">
+            </div>
+        `;
+
+        const wifiTemplate = `
+            <div class="form-group">
+                <label for="wifi-ssid">Tên mạng (SSID)</label>
+                <input type="text" id="wifi-ssid" required>
+            </div>
+            <div class="form-group">
+                <label for="wifi-password">Mật khẩu</label>
+                <input type="text" id="wifi-password">
+            </div>
+            <div class="form-group">
+                <label for="wifi-security">Phương thức bảo mật</label>
+                <select id="wifi-security">
+                    <option value="WPA">WPA</option>
+                    <option value="WEP">WEP</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+        `;
+
+        function updateFormFields() {
+            const selectedType = qrTypeSelect.value;
+            if (selectedType === 'link') {
+                formFields.innerHTML = linkTemplate;
+            } else if (selectedType === 'vcard') {
+                formFields.innerHTML = vcardTemplate;
+            } else if (selectedType === 'wifi') {
+                formFields.innerHTML = wifiTemplate;
+            }
+            attachFormListeners();
+        }
+
+        function attachFormListeners() {
+            const inputs = formFields.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', generateQRCode);
+            });
+        }
+
+        function removeVietnameseTones(str) {
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y");
+            str = str.replace(/đ/g,"d");
+            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+            str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+            str = str.replace(/Đ/g, "D");
+            // Some system encode vietnamese combining accent as individual utf-8 characters
+            // Một vài bộ encode coi các dấu mũ, dấu chữ, dấu hỏi, dấu ngã, dấu nặng là các ký tự riêng
+            str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+            str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  mũ, trăng, râu
+            // Remove extra spaces
+            // Bỏ các khoảng trắng liền nhau
+            str = str.replace(/ + /g," ");
+            str = str.trim();
+            return str;
+        }
+
+        function generateQRCode() {
+            const selectedType = qrTypeSelect.value;
+            let data = '';
+
+            if (selectedType === 'link') {
+                data = document.getElementById('text-input').value;
+            } else if (selectedType === 'vcard') {
+                const name = removeVietnameseTones(document.getElementById('vcard-name').value);
+                const phone = document.getElementById('vcard-phone').value;
+                const email = document.getElementById('vcard-email').value;
+                const company = removeVietnameseTones(document.getElementById('vcard-company').value);
+                const title = removeVietnameseTones(document.getElementById('vcard-title').value);
+                data = `BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+ORG:${company}
+TITLE:${title}
+TEL:${phone}
+EMAIL:${email}
+END:VCARD`;
+            } else if (selectedType === 'wifi') {
+                const ssid = document.getElementById('wifi-ssid').value;
+                const password = document.getElementById('wifi-password').value;
+                const security = document.getElementById('wifi-security').value;
+                data = `WIFI:T:${security};S:${ssid};P:${password};;`;
+            }
+
+            if (!data) {
+                data = " ";
+            }
+
+            if (selectedType === 'vcard') {
+                console.log("vCard Data:", data);
+            }
+
+            qrCodeOptions.data = data;
+            
+            if (qrCode) {
+                qrCode.update(qrCodeOptions);
+            } else {
+                qrCode = new QRCodeStyling(qrCodeOptions);
+                qrCode.append(canvas);
+            }
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (qrCode) {
+                qrCode.download({ name: "qr-code", extension: "png" });
+            }
+        });
+
+        qrTypeSelect.addEventListener('change', updateFormFields);
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    qrCodeOptions.image = event.target.result;
+                    generateQRCode();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initial setup
+        updateFormFields();
+        generateQRCode();
+    </script>
+</body>
+</html>

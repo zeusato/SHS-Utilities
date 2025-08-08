@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo QR nhận tiền - SHS Utilities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #10a37f;
+        }
+
+        .back-btn {
+            background: #10a37f;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #0d8a6b;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        /* QR Form Container */
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10a37f;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-container label {
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10a37f 0%, #0d8a6b 100%);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 163, 127, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* QR Result Container */
+        .qr-result {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .qr-frame {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0,0,0,0.1);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .qr-container {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .qr-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .form-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Bank datalist styling */
+        datalist {
+            display: none;
+        }
+
+        .form-input[list]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+
+        /* Success/Error messages */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="Source/1. Logo.jpg" alt="SHS Utilities Logo">
+                <span class="logo-text">SHS Utilities</span>
+            </a>
+            <nav>
+                <a href="index.html" class="back-btn">← Quay lại</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="page-title">💳 Tạo QR nhận tiền</h1>
+        <p class="page-subtitle">Tạo mã QR chuyển khoản nhanh chóng và tiện lợi</p>
+
+        <!-- QR Form -->
+        <div class="qr-container">
+            <h2 class="form-title">Thông tin tài khoản nhận tiền</h2>
+            
+            <form id="qrFormPro" autocomplete="off">
+                <div class="form-group">
+                    <label for="stkPro" class="form-label">Số tài khoản nhận tiền</label>
+                    <input 
+                        id="stkPro" 
+                        name="stkPro" 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Nhập số tài khoản" 
+                        required 
+                        tabindex="1"
+                    />
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="saveStkPro" tabindex="2">
+                        <label for="saveStkPro">Lưu thông tin này</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bankPro" class="form-label">Ngân hàng thụ hưởng</label>
+                    <input 
+                        id="bankPro" 
+                        name="bankPro" 
+                        list="bankListPro" 
+                        class="form-input"
+                        placeholder="Tìm và chọn ngân hàng..." 
+                        required 
+                        tabindex="3"
+                    />
+                    <datalist id="bankListPro">
+                        <option value="970415 - VietinBank"></option>
+                        <option value="970436 - Vietcombank"></option>
+                        <option value="970418 - BIDV"></option>
+                        <option value="970405 - Agribank"></option>
+                        <option value="970448 - OCB"></option>
+                        <option value="970422 - MBBank"></option>
+                        <option value="970407 - Techcombank"></option>
+                        <option value="970416 - ACB"></option>
+                        <option value="970432 - VPBank"></option>
+                        <option value="970423 - TPBank"></option>
+                        <option value="970403 - Sacombank"></option>
+                        <option value="970437 - HDBank"></option>
+                        <option value="970454 - VietCapitalBank"></option>
+                        <option value="970429 - SCB"></option>
+                        <option value="970441 - VIB"></option>
+                        <option value="970443 - SHB"></option>
+                        <option value="970431 - Eximbank"></option>
+                        <option value="970426 - MSB"></option>
+                        <option value="546034 - CAKE"></option>
+                        <option value="546035 - Ubank"></option>
+                        <option value="963388 - Timo"></option>
+                        <option value="971005 - ViettelMoney"></option>
+                        <option value="971011 - VNPTMoney"></option>
+                        <option value="970400 - SaigonBank"></option>
+                        <option value="970409 - BacABank"></option>
+                        <option value="970412 - PVcomBank"></option>
+                        <option value="970414 - MBV"></option>
+                        <option value="970419 - NCB"></option>
+                        <option value="970424 - ShinhanBank"></option>
+                        <option value="970425 - ABBANK"></option>
+                        <option value="970427 - VietABank"></option>
+                        <option value="970428 - NamABank"></option>
+                        <option value="970430 - PGBank"></option>
+                        <option value="970433 - VietBank"></option>
+                        <option value="970438 - BaoVietBank"></option>
+                        <option value="970440 - SeABank"></option>
+                        <option value="970446 - COOPBANK"></option>
+                        <option value="970449 - LPBank"></option>
+                        <option value="970452 - KienLongBank"></option>
+                        <option value="668888 - KBank"></option>
+                        <option value="970462 - KookminHN"></option>
+                        <option value="970466 - KEBHanaHCM"></option>
+                        <option value="970467 - KEBHanaHN"></option>
+                        <option value="977777 - MAFC"></option>
+                        <option value="533948 - Citibank"></option>
+                        <option value="970463 - KookminHCM"></option>
+                        <option value="999888 - VBSP"></option>
+                        <option value="970457 - Woori"></option>
+                        <option value="970421 - VRB"></option>
+                        <option value="970458 - UnitedOverseas"></option>
+                        <option value="970410 - StandardChartered"></option>
+                        <option value="970439 - PublicBank"></option>
+                        <option value="801011 - Nonghyup"></option>
+                        <option value="970434 - IndovinaBank"></option>
+                        <option value="970456 - IBKHCM"></option>
+                        <option value="970455 - IBKHN"></option>
+                        <option value="458761 - HSBC"></option>
+                        <option value="970442 - HongLeong"></option>
+                        <option value="970408 - GPBank"></option>
+                        <option value="970406 - Vikki"></option>
+                        <option value="796500 - DBSBank"></option>
+                        <option value="422589 - CIMB"></option>
+                        <option value="970444 - CBBank"></option>
+                    </datalist>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="saveBankPro" tabindex="4">
+                        <label for="saveBankPro">Lưu thông tin này</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="amountPro" class="form-label">Số tiền (VNĐ)</label>
+                    <input 
+                        id="amountPro" 
+                        name="amountPro" 
+                        type="text" 
+                        inputmode="numeric" 
+                        pattern="[0-9,\.]*" 
+                        class="form-input"
+                        placeholder="Nhập số tiền" 
+                        required 
+                        tabindex="5"
+                    />
+                </div>
+
+                <button type="submit" class="submit-btn" tabindex="6">
+                    🎯 Tạo mã QR
+                </button>
+            </form>
+        </div>
+
+        <!-- QR Result -->
+        <div class="qr-result">
+            <iframe 
+                id="qrFramePro" 
+                name="qrFramePro" 
+                class="qr-frame"
+                title="QR Code Result"
+            ></iframe>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 SHS Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
+    </footer>
+
+    <script>
+        // Số tiền: chỉ nhận số, tự chèn phân cách
+        const amountInputPro = document.getElementById('amountPro');
+        amountInputPro.addEventListener('input', function(e) {
+            let val = this.value.replace(/[^0-9]/g, '');
+            if(val) {
+                this.value = Number(val).toLocaleString('vi-VN');
+            } else {
+                this.value = '';
+            }
+        });
+
+        // Auto fill từ localStorage khi load trang
+        window.addEventListener('DOMContentLoaded', function() {
+            // Số tài khoản nhận tiền
+            const savedStkPro = localStorage.getItem('savedStkPro');
+            const saveStkProChecked = localStorage.getItem('saveStkProChecked');
+            if(saveStkProChecked === 'true') {
+                document.getElementById('saveStkPro').checked = true;
+                if(savedStkPro) {
+                    document.getElementById('stkPro').value = savedStkPro;
+                }
+            } else {
+                document.getElementById('saveStkPro').checked = false;
+            }
+
+            // Ngân hàng thụ hưởng
+            const savedBankPro = localStorage.getItem('savedBankPro');
+            const saveBankProChecked = localStorage.getItem('saveBankProChecked');
+            if(saveBankProChecked === 'true') {
+                document.getElementById('saveBankPro').checked = true;
+                if(savedBankPro) {
+                    document.getElementById('bankPro').value = savedBankPro;
+                }
+            } else {
+                document.getElementById('saveBankPro').checked = false;
+            }
+        });
+
+        // Handle Generate QR
+        document.getElementById('qrFormPro').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Lưu trạng thái nếu checkbox được chọn
+            const saveStkPro = document.getElementById('saveStkPro').checked;
+            if(saveStkPro) {
+                localStorage.setItem('savedStkPro', document.getElementById('stkPro').value.trim());
+                localStorage.setItem('saveStkProChecked', 'true');
+            } else {
+                localStorage.removeItem('savedStkPro');
+                localStorage.setItem('saveStkProChecked', 'false');
+            }
+
+            const saveBankPro = document.getElementById('saveBankPro').checked;
+            if(saveBankPro) {
+                localStorage.setItem('savedBankPro', document.getElementById('bankPro').value.trim());
+                localStorage.setItem('saveBankProChecked', 'true');
+            } else {
+                localStorage.removeItem('savedBankPro');
+                localStorage.setItem('saveBankProChecked', 'false');
+            }
+
+            const stk = document.getElementById('stkPro').value.trim();
+            const bank = document.getElementById('bankPro').value.trim().split(' ')[0];
+            let amountRaw = amountInputPro.value.replace(/[^0-9]/g, '');
+            
+            if (!bank || !stk || !amountRaw || amountRaw === '0') {
+                showMessage('Vui lòng nhập đủ thông tin và số tiền hợp lệ!', 'error');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Đang tạo QR...';
+            submitBtn.disabled = true;
+
+            var url = 'https://zeusato.github.io/qr-payment/qr.html?bank=' + encodeURIComponent(bank)
+                + '&stk=' + encodeURIComponent(stk)
+                + '&amount=' + encodeURIComponent(amountRaw)
+                + '&t=' + Date.now();
+            
+            var qrFrame = document.getElementById('qrFramePro');
+            if(qrFrame.hasAttribute('srcdoc')) qrFrame.removeAttribute('srcdoc');
+            qrFrame.src = url;
+
+            // Reset button after a delay
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                showMessage('QR code đã được tạo thành công!', 'success');
+                
+                // Scroll to QR result
+                document.querySelector('.qr-result').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 2000);
+        });
+
+        // Show message function
+        function showMessage(text, type) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+
+            // Create new message
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+
+            // Insert before form
+            const form = document.getElementById('qrFormPro');
+            form.parentNode.insertBefore(message, form);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.remove();
+                }
+            }, 5000);
+        }
+
+        // Enhanced form validation
+        document.getElementById('stkPro').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Bank input enhancement
+        document.getElementById('bankPro').addEventListener('input', function() {
+            const value = this.value;
+            const datalist = document.getElementById('bankListPro');
+            const options = datalist.querySelectorAll('option');
+            
+            // Highlight matching options
+            options.forEach(option => {
+                if (option.value.toLowerCase().includes(value.toLowerCase())) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

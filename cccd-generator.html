@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resize ảnh CCCD/Hộ chiếu</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+
+        .back-btn {
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #1a7f64;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        .workflow-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section {
+            border: 2px dashed #10a37f;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-section:hover {
+            border-color: #1a7f64;
+            background: #f0f8f5;
+        }
+
+        .upload-section.dragover {
+            border-color: #1a7f64;
+            background: #e8f5e8;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #10a37f;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #1a7f64;
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .preview-placeholder {
+            color: #999;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .options-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .options-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .option-group {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .option-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #10a37f;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .radio-option:hover {
+            background: #f0f8f5;
+        }
+
+        .radio-option input[type="radio"] {
+            accent-color: #10a37f;
+        }
+
+
+        .process-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 163, 127, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-btn:hover {
+            background: linear-gradient(135deg, #1a7f64 0%, #0f5a4a 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 163, 127, 0.4);
+        }
+
+        .process-btn:disabled {
+            background: linear-gradient(135deg, #ccc 0%, #999 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-section {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-preview {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .result-image-container {
+            text-align: center;
+        }
+
+        .result-image {
+            max-width: 200px;
+            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .status-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #10a37f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .workflow-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-preview {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="Source/1. Logo.jpg" alt="Logo">
+                <span class="logo-text">Utilities</span>
+            </a>
+            <a href="index.html" class="back-btn">← Quay lại</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <h1 class="page-title">🖼️ Resize ảnh CCCD/Hộ chiếu</h1>
+            
+            <!-- Upload & Preview Section -->
+            <div class="workflow-container">
+                <!-- Upload Section -->
+                <div class="upload-section" id="upload-section">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">
+                        Kéo thả ảnh chân dung vào đây hoặc click để chọn file
+                    </div>
+                    <div class="upload-text" style="font-size: 0.9rem; color: #999;">
+                        Hỗ trợ: JPG, PNG, JPEG (tối đa 5MB)
+                    </div>
+                    <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+                        Chọn ảnh chân dung
+                    </button>
+                    <input type="file" id="file-input" class="file-input" accept=".jpg,.jpeg,.png">
+                </div>
+
+                <!-- Preview Section -->
+                <div class="preview-section" id="preview-section">
+                    <div class="preview-placeholder" id="preview-placeholder">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🖼️</div>
+                        <div>Ảnh sẽ hiển thị ở đây sau khi upload</div>
+                    </div>
+                    <img id="preview-image" class="preview-image hidden" alt="Preview">
+                </div>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="status-container"></div>
+
+            <!-- Options Section -->
+            <div class="options-section" id="options-section" style="display: none;">
+                <h3 class="options-title">📐 Chọn kích thước ảnh</h3>
+                <div class="options-grid" style="grid-template-columns: 1fr; max-width: 400px; margin: 0 auto;">
+                    <!-- Photo Type Options -->
+                    <div class="option-group">
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="type-cccd" name="photo-type" value="cccd" checked>
+                                <label for="type-cccd">📄 CCCD (3x4 cm - 354x472px)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="type-passport" name="photo-type" value="passport">
+                                <label for="type-passport">🛂 Hộ chiếu (4x6 cm - 472x709px)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Section -->
+            <div class="process-section">
+                <button class="process-btn" id="process-btn" disabled onclick="processImage()">
+                    <span id="process-btn-text">✂️ Cắt và chỉnh kích thước</span>
+                </button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="result-section">
+                <h3 class="result-title">✨ Kết quả</h3>
+                <div class="result-preview">
+                    <div class="result-image-container">
+                        <img id="original-result" class="result-image" alt="Ảnh gốc">
+                        <div class="result-label">Ảnh gốc</div>
+                    </div>
+                    <div class="result-image-container">
+                        <img id="processed-result" class="result-image" alt="Ảnh đã xử lý">
+                        <div class="result-label">Ảnh đã xử lý</div>
+                    </div>
+                </div>
+                <button class="download-btn" id="download-btn" onclick="downloadImage()">
+                    📥 Tải ảnh về
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+        let faceDetectionModel = null;
+        let processedImageData = null;
+
+        // Initialize face detection model
+        async function initializeFaceDetection() {
+            try {
+                console.log('Loading face detection model...');
+                faceDetectionModel = await blazeface.load();
+                console.log('Face detection model loaded successfully');
+                showStatus('Đã tải xong mô hình nhận diện khuôn mặt', 'success');
+            } catch (error) {
+                console.error('Error loading face detection model:', error);
+                showStatus('Không thể tải mô hình nhận diện khuôn mặt. Một số tính năng có thể không hoạt động.', 'warning');
+            }
+        }
+
+        // File upload handling
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const previewSection = document.getElementById('preview-section');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const previewImage = document.getElementById('preview-image');
+        const optionsSection = document.getElementById('options-section');
+        const processBtn = document.getElementById('process-btn');
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/') || !['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+                showStatus('Định dạng file không được hỗ trợ. Vui lòng chọn file JPG, JPEG hoặc PNG.', 'error');
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showStatus('File quá lớn. Vui lòng chọn file nhỏ hơn 5MB.', 'error');
+                return;
+            }
+
+            uploadedFile = file;
+            showPreview(file);
+        }
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove('hidden');
+                previewPlaceholder.classList.add('hidden');
+                
+                // Show options and enable process button
+                optionsSection.style.display = 'block';
+                processBtn.disabled = false;
+                
+                showStatus('Đã nhận ảnh - sẵn sàng xử lý!', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+
+        // Process image
+        async function processImage() {
+            if (!uploadedFile) {
+                showStatus('Vui lòng chọn ảnh trước khi xử lý.', 'error');
+                return;
+            }
+
+            // Update button state
+            processBtn.disabled = true;
+            document.getElementById('process-btn-text').innerHTML = '<span class="loading"></span> Đang xử lý...';
+
+            try {
+                showStatus('Đang phân tích ảnh...', 'warning');
+
+                // Create image element for processing
+                const img = new Image();
+                img.onload = async () => {
+                    try {
+                        // Detect face
+                        let faceDetected = false;
+                        let faceBox = null;
+
+                        if (faceDetectionModel) {
+                            const predictions = await faceDetectionModel.estimateFaces(img, false);
+                            if (predictions.length > 0) {
+                                faceDetected = true;
+                                faceBox = predictions[0].boundingBox;
+                                showStatus('Đã phát hiện khuôn mặt - đang căn chỉnh...', 'success');
+                            }
+                        }
+
+                        if (!faceDetected) {
+                            showStatus('Không phát hiện được khuôn mặt rõ ràng. Sẽ xử lý ảnh theo cách thông thường.', 'warning');
+                        }
+
+                        // Get processing options
+                        const photoType = document.querySelector('input[name="photo-type"]:checked').value;
+
+                        // Process the image
+                        const processedCanvas = await processImageWithOptions(img, {
+                            faceBox,
+                            photoType
+                        });
+
+                        // Show results
+                        showResults(img, processedCanvas);
+                        
+                    } catch (error) {
+                        console.error('Error processing image:', error);
+                        showStatus('Có lỗi xảy ra khi xử lý ảnh: ' + error.message, 'error');
+                    } finally {
+                        // Reset button
+                        processBtn.disabled = false;
+                        document.getElementById('process-btn-text').innerHTML = '✂️ Cắt và chỉnh kích thước';
+                    }
+                };
+
+                img.onerror = () => {
+                    showStatus('Không thể tải ảnh. Vui lòng thử lại.', 'error');
+                    processBtn.disabled = false;
+                    document.getElementById('process-btn-text').innerHTML = '✂️ Cắt và chỉnh kích thước';
+                };
+
+                img.src = URL.createObjectURL(uploadedFile);
+
+            } catch (error) {
+                console.error('Error in processImage:', error);
+                showStatus('Có lỗi xảy ra: ' + error.message, 'error');
+                processBtn.disabled = false;
+                document.getElementById('process-btn-text').innerHTML = '✂️ Cắt và chỉnh kích thước';
+            }
+        }
+
+        async function processImageWithOptions(img, options) {
+            const { faceBox, photoType } = options;
+
+            // Get target dimensions based on photo type
+            const dimensions = getPhotoDimensions(photoType);
+            
+            // Create high-quality canvas for processing
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = dimensions.width;
+            canvas.height = dimensions.height;
+
+            // Optimize canvas for maximum quality
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            // Calculate crop area
+            let cropArea;
+            if (faceBox) {
+                // Center the crop around the detected face
+                cropArea = calculateCropAreaWithFace(img, faceBox, dimensions);
+            } else {
+                // Center crop without face detection
+                cropArea = calculateCenterCrop(img, dimensions);
+            }
+
+            // For maximum quality, use multi-step scaling if needed
+            const scaleRatio = Math.min(
+                dimensions.width / cropArea.sw,
+                dimensions.height / cropArea.sh
+            );
+
+            if (scaleRatio < 0.5) {
+                // If scaling down significantly, use intermediate canvas for better quality
+                const intermediateCanvas = document.createElement('canvas');
+                const intermediateCtx = intermediateCanvas.getContext('2d');
+                
+                // Create intermediate size (2x target size for better quality)
+                const intermediateWidth = dimensions.width * 2;
+                const intermediateHeight = dimensions.height * 2;
+                
+                intermediateCanvas.width = intermediateWidth;
+                intermediateCanvas.height = intermediateHeight;
+                
+                intermediateCtx.imageSmoothingEnabled = true;
+                intermediateCtx.imageSmoothingQuality = 'high';
+                
+                // First step: draw to intermediate canvas
+                intermediateCtx.drawImage(
+                    img,
+                    cropArea.sx, cropArea.sy, cropArea.sw, cropArea.sh,
+                    0, 0, intermediateWidth, intermediateHeight
+                );
+                
+                // Second step: draw from intermediate to final canvas
+                ctx.drawImage(
+                    intermediateCanvas,
+                    0, 0, intermediateWidth, intermediateHeight,
+                    0, 0, dimensions.width, dimensions.height
+                );
+            } else {
+                // Direct drawing for smaller scale changes
+                ctx.drawImage(
+                    img,
+                    cropArea.sx, cropArea.sy, cropArea.sw, cropArea.sh,
+                    0, 0, canvas.width, canvas.height
+                );
+            }
+
+            return canvas;
+        }
+
+        function getPhotoDimensions(photoType) {
+            switch (photoType) {
+                case 'cccd':
+                    return {
+                        width: 354,
+                        height: 472,
+                        faceHeightRatio: 0.625, // 60-65% of image height
+                        topMargin: 30, // 20-40px from top
+                        bottomMargin: 45 // 40-50px from bottom
+                    };
+                case 'passport':
+                    return {
+                        width: 472,
+                        height: 709,
+                        faceHeightRatio: 0.675, // 65-70% of image height
+                        topMargin: 40, // 30-50px from top
+                        bottomMargin: 70 // 60-80px from bottom
+                    };
+                default:
+                    return {
+                        width: 354,
+                        height: 472,
+                        faceHeightRatio: 0.625,
+                        topMargin: 30,
+                        bottomMargin: 45
+                    };
+            }
+        }
+
+        function calculateCropAreaWithFace(img, faceBox, targetDimensions) {
+            const [faceX, faceY, faceWidth, faceHeight] = faceBox;
+            const faceCenterX = faceX + faceWidth / 2;
+            const faceCenterY = faceY + faceHeight / 2;
+            
+            // Calculate required face height in the target image
+            const targetFaceHeight = targetDimensions.height * targetDimensions.faceHeightRatio;
+            
+            // Calculate scale factor based on face height
+            const scaleFactor = targetFaceHeight / faceHeight;
+            
+            // Calculate crop dimensions in original image
+            const cropWidth = targetDimensions.width / scaleFactor;
+            const cropHeight = targetDimensions.height / scaleFactor;
+            
+            // Position face according to standards
+            // Face should be centered horizontally
+            const cropX = faceCenterX - cropWidth / 2;
+            
+            // Face should be positioned with proper top margin
+            const targetFaceTopInCrop = targetDimensions.topMargin / scaleFactor;
+            const faceTopY = faceY;
+            const cropY = faceTopY - targetFaceTopInCrop;
+            
+            // Ensure crop area is within image bounds
+            const finalCropX = Math.max(0, Math.min(cropX, img.width - cropWidth));
+            const finalCropY = Math.max(0, Math.min(cropY, img.height - cropHeight));
+            const finalCropWidth = Math.min(cropWidth, img.width - finalCropX);
+            const finalCropHeight = Math.min(cropHeight, img.height - finalCropY);
+
+            return {
+                sx: finalCropX,
+                sy: finalCropY,
+                sw: finalCropWidth,
+                sh: finalCropHeight,
+                scaleFactor: scaleFactor
+            };
+        }
+
+        function calculateCenterCrop(img, targetDimensions) {
+            // For images without face detection, use center crop with target ratio
+            const targetRatio = targetDimensions.width / targetDimensions.height;
+            const imgRatio = img.width / img.height;
+
+            let cropWidth, cropHeight;
+
+            if (imgRatio > targetRatio) {
+                // Image is wider than target ratio
+                cropHeight = img.height;
+                cropWidth = cropHeight * targetRatio;
+            } else {
+                // Image is taller than target ratio
+                cropWidth = img.width;
+                cropHeight = cropWidth / targetRatio;
+            }
+
+            const cropX = (img.width - cropWidth) / 2;
+            const cropY = (img.height - cropHeight) / 2;
+
+            return {
+                sx: cropX,
+                sy: cropY,
+                sw: cropWidth,
+                sh: cropHeight,
+                scaleFactor: Math.min(targetDimensions.width / cropWidth, targetDimensions.height / cropHeight)
+            };
+        }
+
+
+
+        function showResults(originalImg, processedCanvas) {
+            // Show original image
+            const originalResult = document.getElementById('original-result');
+            originalResult.src = URL.createObjectURL(uploadedFile);
+
+            // Show processed image with maximum quality
+            const processedResult = document.getElementById('processed-result');
+            processedResult.src = processedCanvas.toDataURL('image/jpeg', 1.0);
+
+            // Store processed image data for download with maximum quality
+            processedImageData = processedCanvas.toDataURL('image/jpeg', 1.0);
+
+            // Show result section
+            document.getElementById('result-section').style.display = 'block';
+            
+            showStatus('Xử lý ảnh hoàn tất! Bạn có thể tải ảnh về bên dưới.', 'success');
+
+            // Scroll to results
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadImage() {
+            if (!processedImageData) {
+                showStatus('Không có ảnh để tải. Vui lòng xử lý ảnh trước.', 'error');
+                return;
+            }
+
+            const photoType = document.querySelector('input[name="photo-type"]:checked').value;
+            
+            // Generate filename
+            const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const typeMap = {
+                'cccd': 'cccd',
+                'passport': 'passport',
+            };
+            const filename = `${typeMap[photoType]}_photo_${timestamp}.jpg`;
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = processedImageData;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showStatus(`Đã tải ảnh về với tên: ${filename}`, 'success');
+        }
+
+        function showStatus(message, type) {
+            const statusContainer = document.getElementById('status-container');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            
+            // Clear previous messages
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(statusDiv);
+
+            // Auto remove after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (statusContainer.contains(statusDiv)) {
+                        statusContainer.removeChild(statusDiv);
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeFaceDetection();
+            showStatus('Chào mừng! Hãy upload ảnh chân dung để bắt đầu.', 'success');
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer style="background: rgba(0,0,0,0.1); color: white; text-align: center; padding: 2rem; margin-top: 4rem;">
+        <p>&copy; 2025 SHS Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
+    </footer>
+</body>
+</html>
