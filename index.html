@@ -60,6 +60,7 @@
             display: flex;
             gap: 2rem;
             list-style: none;
+            align-items: center;
         }
 
         .nav-menu a {
@@ -359,6 +360,169 @@
                 gap: 1rem !important;
             }
         }
+
+        /* Styles for Translation Popup */
+        #open-translate-popup-btn {
+            font-weight: 500;
+            color: #333;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+        #open-translate-popup-btn:hover {
+            color: #10a37f;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .popup-content {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 750px;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-overlay.active .popup-content {
+            transform: scale(1);
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .popup-header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #0056b3;
+        }
+        .close-btn {
+            font-size: 30px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: color 0.2s;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .translation-container {
+            display: grid;
+            grid-template-columns: 1fr 40px 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        .language-col textarea {
+            width: 100%;
+            height: 180px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .language-col textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        .language-col select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 15px;
+            background-color: #f8f9fa;
+        }
+        .swap-icon {
+            text-align: center;
+            font-size: 24px;
+            color: #007bff;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .swap-icon:hover {
+            transform: rotate(180deg);
+        }
+        .popup-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        #translate-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        #translate-btn:hover {
+            background-color: #218838;
+        }
+        #translate-btn:disabled {
+            background-color: #94d3a2;
+            cursor: not-allowed;
+        }
+        #copy-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #copy-btn:hover {
+            background-color: #5a6268;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        .notification.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -10px);
+        }
     </style>
 </head>
 <body>
@@ -389,6 +553,7 @@
                             <!-- <a href="audio-tools.html">🎧 Ghép / Cắt Âm Thanh</a> -->
                         </div>
                     </li>
+                    <li><button id="open-translate-popup-btn" class="action-btn" style="background-color: #007bff; color: white;">Dịch Nhanh</button></li>
                 </ul>
             </nav>
         </div>
@@ -549,6 +714,45 @@
     <footer class="footer">
         <p>&copy; 2025 SHS Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
     </footer>
+
+    <!-- Translation Popup HTML -->
+    <div id="translate-modal" class="modal-overlay">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>Công cụ dịch thuật</h2>
+                <button id="close-popup-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="translation-container">
+                <div class="language-col">
+                    <select id="source-lang">
+                        <option value="auto">Tự động phát hiện</option>
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="en">Tiếng Anh</option>
+                        <option value="ja">Tiếng Nhật</option>
+                        <option value="ko">Tiếng Hàn</option>
+                        <option value="zh">Tiếng Trung</option>
+                    </select>
+                    <textarea id="source-text" placeholder="Gõ hoặc dán văn bản cần dịch..."></textarea>
+                </div>
+                <div class="swap-icon" title="Đảo ngược ngôn ngữ">&#8646;</div>
+                <div class="language-col">
+                    <select id="target-lang">
+                        <option value="en">Tiếng Anh</option>
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="ja">Tiếng Nhật</option>
+                        <option value="ko">Tiếng Hàn</option>
+                        <option value="zh">Tiếng Trung</option>
+                    </select>
+                    <textarea id="translated-text" placeholder="Kết quả sẽ ở đây..." readonly></textarea>
+                </div>
+            </div>
+            <div class="popup-footer">
+                <button id="copy-btn" class="action-btn">Copy kết quả</button>
+                <button id="translate-btn" class="action-btn">Dịch</button>
+            </div>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
 
     <script>
         // Lấy tên từ localStorage
@@ -1030,6 +1234,138 @@
                 }, 800);
             });
         }
+
+        // --- Translation Popup Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const openBtn = document.getElementById('open-translate-popup-btn');
+            const closeBtn = document.getElementById('close-popup-btn');
+            const modal = document.getElementById('translate-modal');
+            const sourceText = document.getElementById('source-text');
+            const translatedText = document.getElementById('translated-text');
+            const sourceLang = document.getElementById('source-lang');
+            const targetLang = document.getElementById('target-lang');
+            const translateBtn = document.getElementById('translate-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const swapBtn = document.querySelector('.swap-icon');
+            const notification = document.getElementById('notification');
+            let notificationTimeout;
+
+            const LT_ENDPOINTS = [
+                'https://lt.vern.cc',
+                'https://translate.terraprint.co',
+                'https://libretranslate.com',
+            ];
+
+            async function robustTranslate(q, source, target) {
+                let lastErr;
+                for (const base of LT_ENDPOINTS) {
+                    try {
+                        const res = await fetch(`${base}/translate`, {
+                            method: "POST",
+                            body: JSON.stringify({ q, source, target, format: "text" }),
+                            headers: { "Content-Type": "application/json" }
+                        });
+
+                        if (!res.ok) {
+                            let errorMsg = `Lỗi máy chủ ${res.status}`;
+                            try {
+                                const errorData = await res.json();
+                                errorMsg = errorData.error || errorMsg;
+                            } catch (e) {}
+                            throw new Error(errorMsg);
+                        }
+                        
+                        const data = await res.json();
+                        return data;
+                    } catch (e) {
+                        lastErr = e;
+                    }
+                }
+                throw lastErr ?? new Error('Tất cả các máy chủ dịch đều lỗi.');
+            }
+
+            function showNotification(message) {
+                if (notificationTimeout) clearTimeout(notificationTimeout);
+                notification.textContent = message;
+                notification.classList.add('show');
+                notificationTimeout = setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2500);
+            }
+
+            openBtn.addEventListener('click', () => modal.classList.add('active'));
+
+            const closeModal = () => modal.classList.remove('active');
+
+            closeBtn.addEventListener('click', closeModal);
+            // modal.addEventListener('click', (event) => {
+            //     if (event.target === modal) closeModal();
+            // });
+            
+            swapBtn.addEventListener('click', () => {
+                if (sourceLang.value === 'auto') {
+                    showNotification('Không hoán đổi được khi đang ở chế độ "Tự động phát hiện"!');
+                    return;
+                }
+                
+                const tempLang = sourceLang.value;
+                sourceLang.value = targetLang.value;
+                targetLang.value = tempLang;
+
+                const tempText = sourceText.value;
+                sourceText.value = translatedText.value;
+                translatedText.value = tempText;
+            });
+
+            translateBtn.addEventListener('click', async () => {
+                const text = sourceText.value.trim();
+                const fromLang = sourceLang.value;
+                const toLang = targetLang.value;
+
+                if (!text) {
+                    showNotification("Vui lòng nhập văn bản cần dịch.");
+                    return;
+                }
+
+                translateBtn.disabled = true;
+                translateBtn.textContent = 'Đang dịch...';
+                translatedText.value = 'Đang xử lý...';
+
+                try {
+                    const data = await robustTranslate(text, fromLang, toLang);
+                    translatedText.value = data.translatedText;
+
+                    if (fromLang === 'auto' && data.detectedLanguage?.language) {
+                        const detectedLangCode = data.detectedLanguage.language;
+                        const optionExists = Array.from(sourceLang.options).some(opt => opt.value === detectedLangCode);
+                        if (optionExists) {
+                            sourceLang.value = detectedLangCode;
+                            showNotification(`Đã phát hiện ngôn ngữ: ${sourceLang.options[sourceLang.selectedIndex].text}`);
+                        }
+                    }
+                } catch (error) {
+                    translatedText.value = `Lỗi: ${error.message}`;
+                    showNotification('Tất cả các máy chủ dịch đều lỗi, vui lòng thử lại sau.');
+                } finally {
+                    translateBtn.disabled = false;
+                    translateBtn.textContent = 'Dịch';
+                }
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = translatedText.value;
+                if (!textToCopy || textToCopy.includes('Đang xử lý')) {
+                    showNotification('Không có nội dung để sao chép.');
+                    return;
+                }
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showNotification('Đã sao chép vào clipboard!');
+                }).catch(err => {
+                    showNotification('Sao chép thất bại, trình duyệt không hỗ trợ.');
+                });
+            });
+        });
     </script>
 </body>
-</html> 
+</html>
