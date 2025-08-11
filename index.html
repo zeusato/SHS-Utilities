@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:image" content="Source/Thumb.png">
     <link rel="icon" href="Source/LOGO.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Office Utilities - Tiện ích Văn phòng</title>
     <style>
         * {
@@ -60,7 +61,6 @@
             display: flex;
             gap: 2rem;
             list-style: none;
-            align-items: center;
         }
 
         .nav-menu a {
@@ -68,6 +68,9 @@
             color: #333;
             font-weight: 500;
             transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
 
         .nav-menu a:hover {
@@ -523,6 +526,62 @@
             visibility: visible;
             transform: translate(-50%, -10px);
         }
+        .popup-container {
+            width: 90vw; /* Chiếm 90% chiều rộng viewport ban đầu */
+            max-width: 800px; /* Nhưng không quá 800px trên màn hình lớn */
+            height: 90vh; /* Chiếm 90% chiều cao viewport ban đầu */
+            max-height: 600px; /* Nhưng không quá 600px trên màn hình lớn */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000; /* Đảm bảo nổi trên cùng */
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none; /* Ban đầu không tương tác được */
+        }
+        .popup-container.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1); /* Hiệu ứng phóng to nhẹ */
+        }
+        .popup-container.closed {
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.95); /* Hiệu ứng thu nhỏ nhẹ khi đóng */
+        }
+
+        /* Backdrop mờ phía sau popup */
+        .popup-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 1; /* Mặc định hiển thị để che khi loading */
+            pointer-events: auto; /* Mặc định có thể tương tác để đóng */
+        }
+        .popup-backdrop.hidden {
+             opacity: 0;
+             pointer-events: none;
+        }
+
+        /* Ẩn các tab content không được chọn */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Thêm hiệu ứng cho input focus */
+        input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4); /* ring-blue-500/40 */
+            border-color: #3b82f6; /* border-blue-500 */
+        }
     </style>
 </head>
 <body>
@@ -554,6 +613,7 @@
                         </div>
                     </li>
                     <li><button id="open-translate-popup-btn" class="action-btn" style="background-color: #007bff; color: white;">Dịch Nhanh</button></li>
+                    <li><button id="openConverterBtn" class="action-btn" style="background-color: #007bff; color: white;">Xchange</button></li>
                 </ul>
             </nav>
         </div>
@@ -753,6 +813,210 @@
         </div>
     </div>
     <div id="notification" class="notification"></div>
+    <!-- Backdrop -->
+    <div id="popupBackdrop" class="popup-backdrop flex items-center justify-center hidden">
+    <div id="initialLoading" class="text-white text-lg flex items-center">
+        <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Đang tải dữ liệu, đại ca chờ xíu nhé...
+    </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="converterPopup" class="popup-container bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden closed">
+    <div class="p-4 bg-gray-100 flex justify-between items-center border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800">Bộ Chuyển Đổi Đơn Vị</h2>
+        <button id="closePopupBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-semibold leading-none">&times;</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 bg-gray-50">
+        <button class="tab-button active flex-1 py-3 px-4 text-center text-gray-700 font-medium border-b-2 border-blue-600" data-tab="currency">Tiền Tệ</button>
+        <button class="tab-button flex-1 py-3 px-4 text-center text-gray-700 font-medium border-b-2 border-transparent" data-tab="weight">Cân Nặng</button>
+        <button class="tab-button flex-1 py-3 px-4 text-center text-gray-700 font-medium border-b-2 border-transparent" data-tab="length">Chiều Dài</button>
+        <button class="tab-button flex-1 py-3 px-4 text-center text-gray-700 font-medium border-b-2 border-transparent" data-tab="temperature">Nhiệt Độ</button>
+        <button class="tab-button flex-1 py-3 px-4 text-center text-gray-700 font-medium border-b-2 border-transparent" data-tab="area">Diện Tích</button>
+    </div>
+
+    <!-- Content (giữ nguyên từ file của đại ca) -->
+    <!-- === COPY NGUYÊN KHỐI NỘI DUNG CÁC TAB TỪ FILE CỦA ĐẠI CA VÀO ĐÂY (từ <div class="flex-grow ..."> tới </div>) === -->
+     <div class="flex-grow p-6 overflow-y-auto">
+            <!-- Tab Tiền Tệ -->
+            <div id="currency" class="tab-content active space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Chuyển Đổi Tiền Tệ</h3>
+                <div class="flex items-center space-x-3">
+                    <input
+                    id="currencyInput"
+                    type="text"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    placeholder="Nhập số tiền"
+                    class="flex-grow shadow-sm appearance-none border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-describedby="currencyHelp"
+                    pattern="^\d{1,3}([\. ]\d{3})*(,\d+)?$"
+                    />
+                    <input id="currencyRaw" type="hidden" name="amount" />
+                    <small id="currencyHelp" class="text-gray-500">
+                    Chỉ nhập số, dùng dấu <b>,</b> cho thập phân (VD: 12.345,67)
+                    </small>
+                    <select id="currencyFrom" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="USD">USD</option>
+                        <option value="VND">VND</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <option value="CAD">CAD</option>
+                        <option value="AUD">AUD</option>
+                        <option value="CHF">CHF</option>
+                        <option value="CNY">CNY</option>
+                    </select>
+                    <div class="swap-icon" title="Đảo ngược đơn vị">&#8646;</div>
+                    <select id="currencyTo" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="VND">VND</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <option value="CAD">CAD</option>
+                        <option value="AUD">AUD</option>
+                        <option value="CHF">CHF</option>
+                        <option value="CNY">CNY</option>
+                    </select>
+                </div>
+                <button id="convertCurrencyBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg w-full transition duration-200 ease-in-out transform hover:scale-105 active:scale-95 shadow-md flex items-center justify-center">
+                    <span id="currencyBtnText">Chuyển Đổi</span>
+                    <svg id="currencySpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+                <div class="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <p class="text-blue-800 font-medium">Kết quả: <span id="currencyResult" class="font-bold text-lg">0 USD</span></p>
+                    <button class="copy-result-btn bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold py-1.5 px-3 rounded-md transition duration-200 ease-in-out" data-target="currencyResult">Sao Chép</button>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Tỷ giá được cung cấp bởi <a href="https://www.exchangerate-api.com" class="text-blue-600 hover:underline" target="_blank">ExchangeRate-API.com</a>.</p>
+            </div>
+
+            <!-- Tab Cân Nặng -->
+            <div id="weight" class="tab-content space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Chuyển Đổi Cân Nặng (Pound sang Kilogram mặc định)</h3>
+                <div class="flex items-center space-x-3">
+                    <input type="number" id="weightInput" placeholder="Nhập cân nặng" class="flex-grow shadow-sm appearance-none border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="weightFrom" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="lbs">Pound (lbs)</option>
+                        <option value="kg">Kilogram (kg)</option>
+                        <option value="g">Gram (g)</option>
+                    </select>
+                    <div class="swap-icon" title="Đảo ngược đơn vị">&#8646;</div>
+                    <select id="weightTo" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="kg">Kilogram (kg)</option>
+                        <option value="lbs">Pound (lbs)</option>
+                        <option value="g">Gram (g)</option>
+                    </select>
+                </div>
+                <button id="convertWeightBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg w-full transition duration-200 ease-in-out transform hover:scale-105 active:scale-95 shadow-md">
+                    Chuyển Đổi
+                </button>
+                <div class="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <p class="text-blue-800 font-medium">Kết quả: <span id="weightResult" class="font-bold text-lg">0 kg</span></p>
+                    <button class="copy-result-btn bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold py-1.5 px-3 rounded-md transition duration-200 ease-in-out" data-target="weightResult">Sao Chép</button>
+                </div>
+            </div>
+
+            <!-- Tab Chiều Dài -->
+            <div id="length" class="tab-content space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Chuyển Đổi Chiều Dài (Inch sang Centimeter mặc định)</h3>
+                <div class="flex items-center space-x-3">
+                    <input type="number" id="lengthInput" placeholder="Nhập chiều dài" class="flex-grow shadow-sm appearance-none border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="lengthFrom" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="inch">Inch</option>
+                        <option value="cm">Centimeter (cm)</option>
+                        <option value="m">Meter (m)</option>
+                        <option value="km">Kilometer (km)</option>
+                        <option value="ft">Feet (ft)</option>
+                        <option value="yd">Yard (yd)</option>
+                        <option value="mi">Mile (mi)</option>
+                    </select>
+                    <div class="swap-icon" title="Đảo ngược đơn vị">&#8646;</div>
+                    <select id="lengthTo" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="cm">Centimeter (cm)</option>
+                        <option value="inch">Inch</option>
+                        <option value="m">Meter (m)</option>
+                        <option value="km">Kilometer (km)</option>
+                        <option value="ft">Feet (ft)</option>
+                        <option value="yd">Yard (yd)</option>
+                        <option value="mi">Mile (mi)</option>
+                    </select>
+                </div>
+                <button id="convertLengthBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg w-full transition duration-200 ease-in-out transform hover:scale-105 active:scale-95 shadow-md">
+                    Chuyển Đổi
+                </button>
+                <div class="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <p class="text-blue-800 font-medium">Kết quả: <span id="lengthResult" class="font-bold text-lg">0 cm</span></p>
+                    <button class="copy-result-btn bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold py-1.5 px-3 rounded-md transition duration-200 ease-in-out" data-target="lengthResult">Sao Chép</button>
+                </div>
+            </div>
+
+            <!-- Tab Nhiệt Độ -->
+            <div id="temperature" class="tab-content space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Chuyển Đổi Nhiệt Độ (Fahrenheit sang Celsius mặc định)</h3>
+                <div class="flex items-center space-x-3">
+                    <input type="number" id="temperatureInput" placeholder="Nhập nhiệt độ" class="flex-grow shadow-sm appearance-none border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="temperatureFrom" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="F">Fahrenheit (°F)</option>
+                        <option value="C">Celsius (°C)</option>
+                        <option value="K">Kelvin (K)</option>
+                    </select>
+                    <div class="swap-icon" title="Đảo ngược đơn vị">&#8646;</div>
+                    <select id="temperatureTo" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="C">Celsius (°C)</option>
+                        <option value="F">Fahrenheit (°F)</option>
+                        <option value="K">Kelvin (K)</option>
+                    </select>
+                </div>
+                <button id="convertTemperatureBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg w-full transition duration-200 ease-in-out transform hover:scale-105 active:scale-95 shadow-md">
+                    Chuyển Đổi
+                </button>
+                <div class="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <p class="text-blue-800 font-medium">Kết quả: <span id="temperatureResult" class="font-bold text-lg">0 °C</span></p>
+                    <button class="copy-result-btn bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold py-1.5 px-3 rounded-md transition duration-200 ease-in-out" data-target="temperatureResult">Sao Chép</button>
+                </div>
+            </div>
+
+            <!-- Tab Diện Tích -->
+            <div id="area" class="tab-content space-y-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Chuyển Đổi Diện Tích (Mét vuông sang Feet vuông mặc định)</h3>
+                <div class="flex items-center space-x-3">
+                    <input type="number" id="areaInput" placeholder="Nhập diện tích" class="flex-grow shadow-sm appearance-none border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="areaFrom" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="sqm">Mét vuông (m²)</option>
+                        <option value="sqft">Feet vuông (ft²)</option>
+                        <option value="sqkm">Kilomet vuông (km²)</option>
+                        <option value="acre">Acre</option>
+                        <option value="ha">Hecta (ha)</option>
+                    </select>
+                    <div class="swap-icon" title="Đảo ngược đơn vị">&#8646;</div>
+                    <select id="areaTo" class="shadow-sm border border-gray-300 rounded-lg py-2.5 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="sqft">Feet vuông (ft²)</option>
+                        <option value="sqm">Mét vuông (m²)</option>
+                        <option value="sqkm">Kilomet vuông (km²)</option>
+                        <option value="acre">Acre</option>
+                        <option value="ha">Hecta (ha)</option>
+                    </select>
+                </div>
+                <button id="convertAreaBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg w-full transition duration-200 ease-in-out transform hover:scale-105 active:scale-95 shadow-md">
+                    Chuyển Đổi
+                </button>
+                <div class="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                    <p class="text-blue-800 font-medium">Kết quả: <span id="areaResult" class="font-bold text-lg">0 ft²</span></p>
+                    <button class="copy-result-btn bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold py-1.5 px-3 rounded-md transition duration-200 ease-in-out" data-target="areaResult">Sao Chép</button>
+                </div>
+            </div>
+        </div>
+    <!-- BẮT BUỘC giữ nguyên id của các input/select/button/result để JS bắt được -->
+    </div>
 
     <script>
         // Lấy tên từ localStorage
@@ -1365,6 +1629,255 @@
                     showNotification('Sao chép thất bại, trình duyệt không hỗ trợ.');
                 });
             });
+        });
+        // ===== Map tới nút sẵn có của đại ca =====
+        const openConverterBtn = document.getElementById('openConverterBtn');
+
+        // ===== DOM khác =====
+        const converterPopup = document.getElementById('converterPopup');
+        const closePopupBtn = document.getElementById('closePopupBtn');
+        const popupBackdrop = document.getElementById('popupBackdrop');
+        const initialLoading = document.getElementById('initialLoading');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const copyButtons = document.querySelectorAll('.copy-result-btn');
+
+        // Currency
+        const currencyInput = document.getElementById('currencyInput');
+        const currencyFrom = document.getElementById('currencyFrom');
+        const currencyTo = document.getElementById('currencyTo');
+        const convertCurrencyBtn = document.getElementById('convertCurrencyBtn');
+        const currencyBtnText = document.getElementById('currencyBtnText');
+        const currencySpinner = document.getElementById('currencySpinner');
+        const currencyResult = document.getElementById('currencyResult');
+
+        // Weight
+        const weightInput = document.getElementById('weightInput');
+        const weightFrom = document.getElementById('weightFrom');
+        const weightTo = document.getElementById('weightTo');
+        const convertWeightBtn = document.getElementById('convertWeightBtn');
+        const weightResult = document.getElementById('weightResult');
+
+        // Length
+        const lengthInput = document.getElementById('lengthInput');
+        const lengthFrom = document.getElementById('lengthFrom');
+        const lengthTo = document.getElementById('lengthTo');
+        const convertLengthBtn = document.getElementById('convertLengthBtn');
+        const lengthResult = document.getElementById('lengthResult');
+
+        // Temp
+        const temperatureInput = document.getElementById('temperatureInput');
+        const temperatureFrom = document.getElementById('temperatureFrom');
+        const temperatureTo = document.getElementById('temperatureTo');
+        const convertTemperatureBtn = document.getElementById('convertTemperatureBtn');
+        const temperatureResult = document.getElementById('temperatureResult');
+
+        // Area
+        const areaInput = document.getElementById('areaInput');
+        const areaFrom = document.getElementById('areaFrom');
+        const areaTo = document.getElementById('areaTo');
+        const convertAreaBtn = document.getElementById('convertAreaBtn');
+        const areaResult = document.getElementById('areaResult');
+
+        // Helper
+        function showCustomAlert(message){
+            const old=document.getElementById('custom-alert'); if(old) old.remove();
+            const box=document.createElement('div');
+            box.id='custom-alert';
+            box.className='fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50';
+            box.innerHTML=`<div class="bg-white p-6 rounded-lg shadow-2xl max-w-sm w-full text-center">
+            <p class="text-gray-800 text-lg font-medium mb-5">${message}</p>
+            <button id="closeAlertBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg">Ok</button>
+            </div>`;
+            document.body.appendChild(box);
+            document.getElementById('closeAlertBtn').onclick=()=>box.remove();
+        }
+
+        function openPopup(){
+            converterPopup.classList.remove('closed');
+            converterPopup.classList.add('open');
+            popupBackdrop.classList.remove('hidden');
+            document.body.style.overflow='hidden';
+        }
+        function closePopup(){
+            converterPopup.classList.remove('open'); converterPopup.classList.add('closed');
+            setTimeout(()=>popupBackdrop.classList.add('hidden'),300);
+            document.body.style.overflow='';
+        }
+
+        function switchTab(tabId){
+            tabButtons.forEach(b=>{
+            if(b.dataset.tab===tabId){ b.classList.add('active','border-blue-600'); b.classList.remove('border-transparent'); }
+            else { b.classList.remove('active','border-blue-600'); b.classList.add('border-transparent'); }
+            });
+            tabContents.forEach(c=> c.id===tabId ? c.classList.add('active') : c.classList.remove('active'));
+        }
+
+        function copyResult(e){
+            const id=e.target.dataset.target, el=document.getElementById(id);
+            navigator.clipboard?.writeText(el.textContent).then(()=>{
+            e.target.textContent='Đã sao chép!'; setTimeout(()=>e.target.textContent='Sao Chép',1500);
+            }).catch(()=>{
+            showCustomAlert('Không sao chép được, đại ca copy tay giúp em!');
+            });
+        }
+
+        function formatConverterResult(value) {
+            if (value === 0) return '0';
+            // For values less than 1, show decimal places
+            if (value > 0 && value < 1) {
+                // For very small values, show more precision
+                if (value < 0.01) {
+                    return value.toFixed(4).replace('.', ',');
+                }
+                return value.toFixed(2).replace('.', ',');
+            }
+            // For values >= 1, round to the nearest integer and format with dots
+            return Math.round(value).toLocaleString('de-DE');
+        }
+
+        // ==== FX convert (open.er-api.com) ====
+        async function convertCurrency(){
+            const amount = parseFloat(currencyInput.value.replace(/,/g, ''));
+            console.log('Amount:', amount);
+            const from=currencyFrom.value.toUpperCase();
+            const to=currencyTo.value.toUpperCase();
+            if(isNaN(amount)||amount<0){ currencyResult.textContent='Nhập số hợp lệ!'; return; }
+            currencyResult.textContent='Đang tải tỷ giá...';
+            currencyBtnText?.classList.add('hidden'); currencySpinner?.classList.remove('hidden'); convertCurrencyBtn.disabled=true;
+            try{
+            const res=await fetch(`https://open.er-api.com/v6/latest/${from}`);
+            if(!res.ok) throw new Error(res.statusText);
+            const data=await res.json();
+            if(data.result==='success' && data.rates?.[to]!=null){
+                const rate=data.rates[to];
+                const result = amount * rate;
+                //console.log(document.getElementById('amount').value);
+                currencyResult.textContent = `${formatConverterResult(result)} ${to}`;
+                currencyResult.parentElement.parentElement.title = `1 ${from} = ${rate.toLocaleString()} ${to}`;
+            }else{ currencyResult.textContent='Lỗi API!'; showCustomAlert('Không lấy được tỷ giá hoặc không hỗ trợ đơn vị đích.'); }
+            }catch(err){ currencyResult.textContent='Lỗi mạng!'; showCustomAlert('Không liên hệ được dịch vụ tỷ giá.'); }
+            finally{ currencyBtnText?.classList.remove('hidden'); currencySpinner?.classList.add('hidden'); convertCurrencyBtn.disabled=false; }
+        }
+
+        // Weight
+        function convertWeight(){
+            const a=parseFloat(weightInput.value), f=weightFrom.value, t=weightTo.value;
+            if(isNaN(a)||a<0){ weightResult.textContent='Nhập số hợp lệ!'; return; }
+            let g=({lbs:a*453.592,kg:a*1000,g:a})[f];
+            const r=({lbs:g/453.592,kg:g/1000,g:g})[t];
+            weightResult.textContent=`${formatConverterResult(r)} ${t}`;
+        }
+
+        // Length
+        function convertLength(){
+            const a=parseFloat(lengthInput.value), f=lengthFrom.value, t=lengthTo.value;
+            if(isNaN(a)||a<0){ lengthResult.textContent='Nhập số hợp lệ!'; return; }
+            const toM={inch:.0254,cm:.01,m:1,km:1000,ft:.3048,yd:.9144,mi:1609.34};
+            const m=a*toM[f]; const r=m/toM[t]; lengthResult.textContent=`${formatConverterResult(r)} ${t}`;
+        }
+
+        // Temp
+        function convertTemperature(){
+            const a=parseFloat(temperatureInput.value), f=temperatureFrom.value, t=temperatureTo.value;
+            if(isNaN(a)){ temperatureResult.textContent='Nhập số hợp lệ!'; return; }
+            const toK={F:(x)=>(x-32)*5/9+273.15, C:(x)=>x+273.15, K:(x)=>x}[f](a);
+            const fromK={F:(k)=>(k-273.15)*9/5+32, C:(k)=>k-273.15, K:(k)=>k}[t](toK);
+            temperatureResult.textContent=`${formatConverterResult(fromK)} ${t==='F'?'°F':t==='C'?'°C':'K'}`;
+        }
+
+        // Area
+        function convertArea(){
+            const a=parseFloat(areaInput.value), f=areaFrom.value, t=areaTo.value;
+            if(isNaN(a)||a<0){ areaResult.textContent='Nhập số hợp lệ!'; return; }
+            const toSqm={sqm:1,sqft:0.092903,sqkm:1_000_000,acre:4046.86,ha:10000};
+            const sqm=a*toSqm[f]; const r=sqm/toSqm[t];
+            const label={sqm:'m²',sqft:'ft²',sqkm:'km²',acre:'acre',ha:'ha'}[t];
+            areaResult.textContent=`${formatConverterResult(r)} ${label}`;
+        }
+
+        // ===== Events =====
+        openConverterBtn?.addEventListener('click', openPopup);
+        closePopupBtn.addEventListener('click', closePopup);
+        popupBackdrop.addEventListener('click', (e)=>{ if(e.target===popupBackdrop) closePopup(); });
+
+        tabButtons.forEach(b=> b.addEventListener('click', e=> switchTab(e.target.dataset.tab)));
+
+        document.querySelectorAll('.swap-icon').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.target.parentElement;
+                const selects = container.querySelectorAll('select');
+                if (selects.length >= 2) {
+                    const fromSelect = selects[0];
+                    const toSelect = selects[1];
+                    const fromValue = fromSelect.value;
+                    fromSelect.value = toSelect.value;
+                    toSelect.value = fromValue;
+                    
+                    // Trigger conversion based on the active tab
+                    const activeTab = document.querySelector('.tab-content.active').id;
+                    switch(activeTab) {
+                        case 'currency': convertCurrency(); break;
+                        case 'weight': convertWeight(); break;
+                        case 'length': convertLength(); break;
+                        case 'temperature': convertTemperature(); break;
+                        case 'area': convertArea(); break;
+                    }
+                }
+            });
+        });
+
+        convertCurrencyBtn.addEventListener('click', convertCurrency);
+        currencyInput.addEventListener('input', convertCurrency);
+        currencyFrom.addEventListener('change', convertCurrency);
+        currencyTo.addEventListener('change', convertCurrency);
+        currencyInput.addEventListener('keypress', e=>{ if(e.key==='Enter') convertCurrency(); });
+
+        convertWeightBtn.addEventListener('click', convertWeight);
+        weightInput.addEventListener('input', convertWeight);
+        weightFrom.addEventListener('change', convertWeight);
+        weightTo.addEventListener('change', convertWeight);
+        weightInput.addEventListener('keypress', e=>{ if(e.key==='Enter') convertWeight(); });
+
+        convertLengthBtn.addEventListener('click', convertLength);
+        lengthInput.addEventListener('input', convertLength);
+        lengthFrom.addEventListener('change', convertLength);
+        lengthTo.addEventListener('change', convertLength);
+        lengthInput.addEventListener('keypress', e=>{ if(e.key==='Enter') convertLength(); });
+
+        convertTemperatureBtn.addEventListener('click', convertTemperature);
+        temperatureInput.addEventListener('input', convertTemperature);
+        temperatureFrom.addEventListener('change', convertTemperature);
+        temperatureTo.addEventListener('change', convertTemperature);
+        temperatureInput.addEventListener('keypress', e=>{ if(e.key==='Enter') convertTemperature(); });
+
+        convertAreaBtn.addEventListener('click', convertArea);
+        areaInput.addEventListener('input', convertArea);
+        areaFrom.addEventListener('change', convertArea);
+        areaTo.addEventListener('change', convertArea);
+        areaInput.addEventListener('keypress', e=>{ if(e.key==='Enter') convertArea(); });
+
+        // Init sau khi DOM sẵn
+        window.addEventListener('load', async ()=>{
+            popupBackdrop.classList.add('hidden');
+            initialLoading.classList.add('hidden');
+            // mở mặc định tab tiền tệ
+            switchTab('currency');
+            // set default & tính trước
+            if(currencyInput){ currencyInput.value=1; await convertCurrency(); }
+            if(weightInput){ weightInput.value=1; convertWeight(); }
+            if(lengthInput){ lengthInput.value=1; convertLength(); }
+            if(temperatureInput){ temperatureInput.value=32; convertTemperature(); }
+            if(areaInput){ areaInput.value=1; convertArea(); }
+        });
+        const amountInputPro = document.getElementById('currencyInput');
+        amountInputPro.addEventListener('input', function(e) {
+            let val = this.value.replace(/[^0-9]/g, '');
+            if(val) {
+                this.value = Number(val).toLocaleString('en-US');
+            } else {
+                this.value = '';
+            }
         });
     </script>
 </body>
