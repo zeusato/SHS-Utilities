@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tạo Palette màu từ ảnh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        /* Custom cursor for the canvas */
+        #imageCanvas.picker-active {
+            cursor: crosshair;
+        }
+        /* Simple transition for better UX */
+        .color-swatch, .palette-color {
+            transition: all 0.2s ease-in-out;
+        }
+        .palette-color:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Custom styles for the file input */
+        .custom-file-upload {
+            border: 2px dashed #cbd5e1;
+            display: inline-block;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .custom-file-upload:hover {
+            background-color: #f8fafc;
+            border-color: #4f46e5;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Standardized header styles */
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 auto;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8700;
+        }
+        .back-btn {
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .back-btn:hover {
+            background: #1a7f64;
+        }
+        
+        /* Standardized main content styles */
+        .main-content {
+            background: white;
+            border-radius: 0 0 16px 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        .footer {
+            background: rgba(0,0,0,0.1);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">
+            <img src="Source/1. Logo.jpg" alt="Logo">
+            <span class="logo-text">Utilities</span>
+        </a>
+        <a href="index.html" class="back-btn">← Quay lại</a>
+    </header>
+
+    <div class="main-content">
+        <h1 class="page-title">🎨 Công cụ tạo Palette màu</h1>
+        <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Tải ảnh lên, chọn một màu <br> và khám phá các bảng màu tuyệt đẹp</h2>
+            </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Image and Picker -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-bold mb-4">1. Tải ảnh của bạn</h2>
+                
+                <!-- Upload Area -->
+                <div id="uploadArea" class="mb-4">
+                    <input type="file" id="imageLoader" class="hidden" accept="image/*"/>
+                    <label for="imageLoader" class="custom-file-upload w-full">
+                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="mt-2 block text-sm font-medium text-slate-700">Nhấn để tải ảnh lên</span>
+                        <span class="block text-xs text-slate-500">hoặc dán ảnh từ clipboard (Ctrl+V)</span>
+                    </label>
+                </div>
+                
+                <!-- Canvas and Color Preview -->
+                <div id="canvasContainer" class="relative">
+                    <canvas id="imageCanvas" class="w-full h-auto rounded-lg bg-slate-200 border border-slate-300"></canvas>
+                    <div id="previewBox" class="absolute pointer-events-none rounded-full border-4 border-white shadow-lg" style="display: none; width: 50px; height: 50px;"></div>
+                </div>
+
+                <!-- Selected Color Info -->
+                <div id="colorInfo" class="mt-4 p-4 bg-slate-100 rounded-lg flex items-center gap-4" style="display: none;">
+                    <div id="selectedColorSwatch" class="w-12 h-12 rounded-md border-2 border-white shadow-md"></div>
+                    <div>
+                        <h3 class="font-bold text-lg">Màu đã chọn</h3>
+                        <p id="selectedColorHex" class="font-mono text-slate-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Palettes -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-bold mb-4">2. Bảng màu gợi ý</h2>
+                
+                <div id="palette-controls" class="flex items-center gap-4 mb-4">
+                    <label for="scheme-select" class="font-medium">Loại Palette:</label>
+                    <select id="scheme-select" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white">
+                        <option value="monochrome">Đơn sắc (Monochrome)</option>
+                        <option value="monochrome-dark">Đơn sắc tối</option>
+                        <option value="monochrome-light">Đơn sắc sáng</option>
+                        <option value="analogic">Tương đồng (Analogic)</option>
+                        <option value="complement">Bổ sung (Complement)</option>
+                        <option value="analogic-complement">Tương đồng-Bổ sung</option>
+                        <option value="triad">Bộ ba (Triad)</option>
+                        <option value="quad">Bộ bốn (Quad)</option>
+                    </select>
+                </div>
+
+                <div id="paletteContainer" class="space-y-4">
+                    <div id="palettePlaceholder" class="text-center py-12 text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        <p class="mt-2">Palette sẽ hiển thị ở đây sau khi bạn chọn màu.</p>
+                    </div>
+                    <div id="loader" class="mx-auto loader" style="display: none;"></div>
+                </div>
+                
+                <div id="exportSection" class="mt-6 text-center" style="display: none;">
+                    <button id="exportBtn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Xuất ảnh Palette
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Hidden canvas for export -->
+        <canvas id="exportCanvas" style="display: none;"></canvas>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const imageLoader = document.getElementById('imageLoader');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const ctx = imageCanvas.getContext('2d', { willReadFrequently: true });
+        const uploadArea = document.getElementById('uploadArea');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const previewBox = document.getElementById('previewBox');
+        
+        const colorInfo = document.getElementById('colorInfo');
+        const selectedColorSwatch = document.getElementById('selectedColorSwatch');
+        const selectedColorHex = document.getElementById('selectedColorHex');
+
+        const paletteContainer = document.getElementById('paletteContainer');
+        const palettePlaceholder = document.getElementById('palettePlaceholder');
+        const loader = document.getElementById('loader');
+        const schemeSelect = document.getElementById('scheme-select');
+        
+        const exportSection = document.getElementById('exportSection');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportCanvas = document.getElementById('exportCanvas');
+        const exportCtx = exportCanvas.getContext('2d');
+
+        let currentImage = null;
+        let currentPalette = [];
+        let currentBaseColor = '';
+
+        // --- 1. Image Handling ---
+
+        // Handle file input change
+        imageLoader.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                loadImage(file);
+            }
+        });
+
+        // Handle paste event
+        window.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    loadImage(blob);
+                    break; 
+                }
+            }
+        });
+        
+        // Prevent default browser behavior for drag/drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if(files.length > 0) {
+                loadImage(files[0]);
+            }
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function loadImage(source) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    drawImageToCanvas(img);
+                    imageCanvas.classList.add('picker-active');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(source);
+        }
+
+        function drawImageToCanvas(img) {
+            const maxWidth = canvasContainer.clientWidth;
+            const scale = maxWidth / img.width;
+            imageCanvas.width = maxWidth;
+            imageCanvas.height = img.height * scale;
+            ctx.drawImage(img, 0, 0, imageCanvas.width, imageCanvas.height);
+        }
+
+        // Redraw canvas on window resize
+        window.addEventListener('resize', () => {
+            if (currentImage) {
+                drawImageToCanvas(currentImage);
+            }
+        });
+
+        // --- 2. Color Picker Logic ---
+        
+        imageCanvas.addEventListener('mousemove', (e) => {
+            if (!currentImage) return;
+
+            const rect = imageCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+            
+            // Update preview swatch
+            previewBox.style.display = 'block';
+            previewBox.style.left = `${e.clientX - rect.left - 25}px`;
+            previewBox.style.top = `${e.clientY - rect.top - 25}px`;
+            previewBox.style.backgroundColor = hex;
+        });
+
+        imageCanvas.addEventListener('mouseleave', () => {
+            previewBox.style.display = 'none';
+        });
+
+        imageCanvas.addEventListener('click', (e) => {
+            if (!currentImage) return;
+
+            const rect = imageCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+            
+            selectColor(hex);
+        });
+        
+        function selectColor(hex) {
+            currentBaseColor = hex;
+            colorInfo.style.display = 'flex';
+            selectedColorSwatch.style.backgroundColor = hex;
+            selectedColorHex.textContent = hex.toUpperCase();
+            
+            fetchPalette(hex);
+        }
+
+        // --- 3. API & Palette Display ---
+
+        schemeSelect.addEventListener('change', () => {
+            if (currentBaseColor) {
+                fetchPalette(currentBaseColor);
+            }
+        });
+
+        async function fetchPalette(hex) {
+            palettePlaceholder.style.display = 'none';
+            loader.style.display = 'block';
+            paletteContainer.innerHTML = ''; // Clear previous palette
+            paletteContainer.appendChild(loader);
+            exportSection.style.display = 'none';
+
+            const cleanHex = hex.substring(1); // Remove '#'
+            const scheme = schemeSelect.value;
+            const count = 6;
+            const url = `https://www.thecolorapi.com/scheme?hex=${cleanHex}&mode=${scheme}&count=${count}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                currentPalette = data.colors;
+                displayPalette(data.colors);
+            } catch (error) {
+                console.error("Could not fetch palette:", error);
+                loader.style.display = 'none';
+                paletteContainer.innerHTML = `<p class="text-center text-red-500">Đã xảy ra lỗi khi lấy palette. Vui lòng thử lại.</p>`;
+            }
+        }
+
+        function displayPalette(colors) {
+            loader.style.display = 'none';
+            paletteContainer.innerHTML = ''; // Clear loader
+            
+            const paletteGrid = document.createElement('div');
+            paletteGrid.className = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3';
+
+            colors.forEach(color => {
+                const hexValue = color.hex.value;
+                const colorEl = document.createElement('div');
+                colorEl.className = 'palette-color text-center cursor-pointer';
+                colorEl.innerHTML = `
+                    <div class="color-swatch h-24 rounded-lg shadow-md" style="background-color: ${hexValue};"></div>
+                    <p class="mt-2 font-mono text-sm font-medium">${hexValue}</p>
+                `;
+                
+                // Add copy to clipboard functionality
+                colorEl.addEventListener('click', () => {
+                    copyToClipboard(hexValue, colorEl);
+                });
+
+                paletteGrid.appendChild(colorEl);
+            });
+            
+            paletteContainer.appendChild(paletteGrid);
+            exportSection.style.display = 'block';
+        }
+        
+        function copyToClipboard(text, element) {
+            // Use execCommand as a fallback for iframe environments
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; //avoid scrolling to bottom
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const originalText = element.querySelector('p').innerText;
+                element.querySelector('p').innerText = 'Đã sao chép!';
+                setTimeout(() => {
+                    element.querySelector('p').innerText = originalText;
+                }, 1500);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // --- 4. Export Logic ---
+        
+        exportBtn.addEventListener('click', () => {
+            if (currentPalette.length === 0) return;
+            
+            const swatchHeight = 100;
+            const textHeight = 30;
+            const totalHeight = swatchHeight + textHeight;
+            const swatchWidth = 120;
+            const padding = 20;
+
+            exportCanvas.width = (swatchWidth * currentPalette.length) + (padding * 2);
+            exportCanvas.height = totalHeight + (padding * 2);
+
+            // White background
+            exportCtx.fillStyle = '#ffffff';
+            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+            exportCtx.font = '16px "Be Vietnam Pro", sans-serif';
+            exportCtx.textAlign = 'center';
+            
+            currentPalette.forEach((color, index) => {
+                const x = padding + (index * swatchWidth);
+                
+                // Draw color swatch
+                exportCtx.fillStyle = color.hex.value;
+                exportCtx.fillRect(x, padding, swatchWidth, swatchHeight);
+
+                // Draw text
+                exportCtx.fillStyle = '#000000';
+                exportCtx.fillText(color.hex.value, x + swatchWidth / 2, padding + swatchHeight + 20);
+            });
+
+            // Trigger download
+            const link = document.createElement('a');
+            link.download = `color-palette-${currentBaseColor.substring(1)}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+
+        // --- Utility Functions ---
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+    </script>
+
+    <!-- Footer -->
+    <footer style="background: rgba(0,0,0,0.1); color: white; text-align: center; padding: 2rem; margin-top: 4rem;">
+        <p>&copy; 2025 SHS Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
+    </footer>
+</body>
+</html>
