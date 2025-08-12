@@ -294,7 +294,7 @@
             let data = '';
 
             if (selectedType === 'link') {
-                data = document.getElementById('text-input').value;
+                data = removeVietnameseTones(document.getElementById('text-input').value);
             } else if (selectedType === 'vcard') {
                 const name = removeVietnameseTones(document.getElementById('vcard-name').value);
                 const phone = document.getElementById('vcard-phone').value;
@@ -359,5 +359,6 @@ END:VCARD`;
     </script>
 </body>
 </html>
+
 
 
