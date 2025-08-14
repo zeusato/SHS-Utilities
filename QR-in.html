@@ -416,16 +416,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="amountPro" class="form-label">Số tiền (VNĐ)</label>
-                    <input 
-                        id="amountPro" 
-                        name="amountPro" 
-                        type="text" 
-                        inputmode="numeric" 
-                        pattern="[0-9,\.]*" 
+                    <label for="amountPro" class="form-label">Số tiền (VNĐ) - Bỏ trống nếu muốn tạo QR không có sẵn số tiền</label>
+                    <input
+                        id="amountPro"
+                        name="amountPro"
+                        type="text"
+                        inputmode="numeric"
+                        pattern="[0-9,\.]*"
                         class="form-input"
-                        placeholder="Nhập số tiền" 
-                        required 
+                        placeholder="Nhập số tiền (mặc định 0)"
                         tabindex="5"
                     />
                 </div>
@@ -516,10 +515,10 @@
 
             const stk = document.getElementById('stkPro').value.trim();
             const bank = document.getElementById('bankPro').value.trim().split(' ')[0];
-            let amountRaw = amountInputPro.value.replace(/[^0-9]/g, '');
+            let amountRaw = amountInputPro.value.replace(/[^0-9]/g, '') || '0';
             
-            if (!bank || !stk || !amountRaw || amountRaw === '0') {
-                showMessage('Vui lòng nhập đủ thông tin và số tiền hợp lệ!', 'error');
+            if (!bank || !stk) {
+                showMessage('Vui lòng nhập đủ thông tin STK và Ngân hàng!', 'error');
                 return;
             }
 
