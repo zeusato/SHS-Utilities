@@ -88,13 +88,11 @@
             <div class="two">
                 <!-- Left: controls -->
                 <div class="card card-body grid">
-                    
                     <div class="grid" style="gap:10px; display:none">
                         <div class="row"><label style="min-width:120px">Tiêu đề email (tiêu đề ở thân, không phải subject)</label><input id="title" class="input" placeholder="Ví dụ: Khuyến mãi tháng 8 – Senergy"/></div>
                         <div class="row"><label style="min-width:120px">Preheader (ẩn)</label><input id="preheader" class="input" placeholder="Dòng mô tả ngắn hiển thị cùng subject trong inbox"/></div>
-                    </div>                    
+                    </div>
                     <div class="hr" style="display:none"></div>
-                    
                     <div class="grid" style="gap:10px">
                         <div class="switch"><input type="checkbox" id="useHeader"/> <label for="useHeader"><b>Dùng Header</b> (ảnh)</label></div>
                         <div class="row" id="headerRow" style="display:none">
@@ -243,10 +241,22 @@ async function toBase64(file){
   });
 }
 
+function autoLink(html) {
+  if (!html) return '';
+  // Link URLs
+  html = html.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+  // Link emails
+  html = html.replace(/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/g, '<a href="mailto:$1">$1</a>');
+  // Link phone numbers
+  html = html.replace(/(\b\d{10}\b)/g, '<a href="tel:$1">$1</a>');
+  return html;
+}
+
 function buildAndPreview(){
   const title = byId('title').value.trim();
   const preheader = byId('preheader').value.trim();
-  const bodyHtml = getEditorHtml();
+  const rawBodyHtml = getEditorHtml();
+  const bodyHtml = autoLink(rawBodyHtml);
   const html = emailHtml({title, preheader, bodyHtml, headerDataUrl: state.headerDataUrl, footerDataUrl: state.footerDataUrl});
   byId('htmlOut').value = html;
   const blob = new Blob([html],{type:'text/html'});
@@ -273,7 +283,3 @@ async function copyHtml(){
 </script>
 </body>
 </html>
-
-
-
-
