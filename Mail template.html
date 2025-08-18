@@ -174,11 +174,11 @@ byId('useFooter').addEventListener('change', (e) => {
 });
 
 byId('headerFile').addEventListener('change', async (e) => {
-  const f = e.target.files && e.target.files;
+  const f = e.target.files && e.target.files[0];
   state.headerDataUrl = f ? await toBase64(f) : '';
 });
 byId('footerFile').addEventListener('change', async (e) => {
-  const f = e.target.files && e.target.files;
+  const f = e.target.files && e.target.files[0];
   state.footerDataUrl = f ? await toBase64(f) : '';
 });
 
