@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="https://zeusato.github.io/Z-Utilities/Source/Thumb.png">
+    <link rel="icon" href="Source/LOGO.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Image → Base64 - Office Utilities</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --bg:#f0f4f9; --card:#ffffff; --muted:#6b7280; --text:#1f2937; --brand:#4f46e5; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+        .header { background: #FFFFFF; backdrop-filter: blur(10px); padding: 1rem 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .logo img { height: 40px; width: auto; }
+        .logo-text { font-size: 1.5rem; font-weight: 700; color: #32336e; }
+        .nav-menu { display: flex; gap: 2rem; list-style: none; }
+        .nav-menu a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; display: flex; align-items: center; height: 100%; }
+        .nav-menu a:hover { color: #10a37f; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; background-color: white; min-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); border-radius: 12px; z-index: 1000; top: 100%; right: 0; margin-top: 0.5rem; padding: 0.5rem 0; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; pointer-events: none; }
+        .dropdown-content.show { display: block; opacity: 1; transform: translateY(0); pointer-events: all; }
+        .dropdown-content a { color: #333; padding: 12px 20px; text-decoration: none; display: block; font-weight: 500; transition: all 0.3s ease; border-radius: 8px; margin: 0 0.5rem; }
+        .dropdown-content a:hover { background-color: #f0f8f5; color: #10a37f; }
+        .dropdown > a::after { content: " ▼"; font-size: 0.8rem; margin-left: 0.5rem; }
+        .main-content { max-width: 1200px; margin: 40px auto; padding: 24px; }
+        .card { background: var(--card); border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.08); }
+        .grid { display: grid; gap: 24px; }
+        .head { padding: 24px 24px 0; }
+        h1 { margin: 0 0 8px; font-size: 28px; font-weight: 700; color: #111827; }
+        p { margin: 0; color: var(--muted); }
+        .body { padding: 24px; }
+        .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+        .btn { appearance: none; border: none; cursor: pointer; background: var(--brand); color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: background-color 0.2s; }
+        .btn:hover { background: #4338ca; }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+        .ghost { background: transparent; border: 1px solid #d1d5db; color: var(--text); }
+        .ghost:hover { background: #f9fafb; }
+        .input { border: 1px solid #d1d5db; background: #f9fafb; color: var(--text); padding: 10px 12px; border-radius: 10px; }
+        .drop { border: 2px dashed #d1d5db; border-radius: 14px; padding: 40px; text-align: center; color: var(--muted); transition: all 0.2s; }
+        .drop.drag { border-color: var(--brand); background: #eef2ff; color: #3730a3; }
+        .preview { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .item { display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: start; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+        .thumb { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
+        textarea { width: 100%; min-height: 120px; resize: vertical; border: 1px solid #d1d5db; background: #f9fafb; color: var(--text); padding: 10px; border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .small { font-size: 13px; color: #4b5563; }
+        .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 800px) { .item { grid-template-columns: 1fr; } .cols { grid-template-columns: 1fr; } }
+        .kbd { font-family: ui-monospace, Consolas, monospace; background: #e5e7eb; border: 1px solid #d1d5db; padding: 2px 6px; border-radius: 6px; }
+        .footer { background: rgba(0,0,0,0.03); color: #6b7280; text-align: center; padding: 2rem; margin-top: 4rem; border-top: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <img src="Source/1. Logo.png" alt="Logo">
+                <span class="logo-text">Utilities</span>
+            </a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li class="dropdown">
+                        <a href="#features">Tính năng</a>
+                        <div class="dropdown-content" id="dropdown-menu">
+                            <a href="pdf-editor.html">📝 PDF Editor</a>
+                            <a href="image-to-pdf-scanner.html">📄 Chuyển đổi ảnh thành PDF</a>
+                            <a href="excel-cleaner.html">🗑️ Dọn rác file Excel</a>
+                            <a href="cccd-generator.html">🖼️ Resize ảnh CCCD/Hộ chiếu</a>
+                            <a href="url-shortener.html">🔗 Rút gọn Link</a>
+                            <a href="random-spinner.html">🌀 Vòng Quay May Mắn</a>
+                            <a href="QR-in.html">💳 Tạo QR nhận tiền</a>
+                            <a href="ocr-extract.html">🧩 Trích xuất văn bản từ ảnh</a>
+                            <a href="qr-generator.html">🔳 Tạo QR Đa Dụng</a>
+                            <a href="extract-video.html">🎥 Tách Hình / Tiếng Từ Video</a>
+                            <a href="Color Palette.html">🎨 Tạo Bảng Màu Từ Ảnh</a>
+                            <a href="IMG2Base64.html">🔄 Image to Base64</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content grid">
+        <div class="card head">
+            <h1>Image → Base64</h1>
+            <p>Kéo thả hoặc chọn ảnh, tool sẽ convert <span class="kbd">data:image/*;base64,....</span> và sinh sẵn thẻ <span class="kbd">&lt;img&gt;</span> để dán vào HTML/Email.</p>
+            <br>
+        </div>
+
+        <div class="card body grid">
+            <div class="row">
+                <input id="file" class="input" type="file" accept="image/*" multiple style="display:none;" />
+                <button id="pick" class="btn"><i class="fas fa-upload"></i> Chọn ảnh</button>
+                <select id="mime" class="input">
+                    <option value="">Giữ định dạng gốc</option>
+                    <option value="image/png">Ép PNG</option>
+                    <option value="image/jpeg">Ép JPEG</option>
+                    <option value="image/webp">Ép WEBP</option>
+                </select>
+                <label class="small"><input type="checkbox" id="resizeChk"> Resize</label>
+                <input id="w" class="input" type="number" placeholder="Width px" style="width:120px" disabled>
+                <input id="h" class="input" type="number" placeholder="Height px" style="width:120px" disabled>
+                <input id="q" class="input" type="number" min="1" max="100" value="92" style="width:96px" title="JPEG/WEBP quality">
+                <button id="clear" class="btn ghost"><i class="fas fa-trash"></i> Xoá danh sách</button>
+                <button id="reset" class="btn ghost"><i class="fas fa-sync-alt"></i> Reset all</button>
+            </div>
+
+            <div id="drop" class="drop">Kéo & thả ảnh vào đây (hoặc bấm “Chọn ảnh”).</div>
+
+            <div class="cols">
+                <div>
+                    <h3 style="margin:0 0 12px; font-size: 20px; font-weight: 600;">Danh sách kết quả</h3>
+                    <div id="list" class="preview"></div>
+                </div>
+                <div>
+                    <h3 style="margin:0 0 12px; font-size: 20px; font-weight: 600;">Gộp tất cả (HTML snippet)</h3>
+                    <textarea id="all" placeholder="&lt;img src=\"data:image/...;base64,...\" alt=\"\" /&gt;"></textarea>
+                    <div class="row" style="margin-top:8px">
+                        <button id="copyAll" class="btn"><i class="fas fa-copy"></i> Copy tất cả</button>
+                        <button id="downloadHtml" class="btn ghost"><i class="fas fa-download"></i> Tải .html</button>
+                    </div>
+                    <p class="small" style="margin-top:12px;">Mẹo: Base64 làm HTML nặng, nên chỉ dùng cho logo/icon/gif nhỏ, email template, hoặc khi cần 1 file duy nhất.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Zeusato Utilities. Bản quyền thuộc về Nguyễn Mạnh Quyết.</p>
+    </footer>
+
+<script>
+const $ = sel => document.querySelector(sel);
+const fileInput = $('#file');
+const pickBtn = $('#pick');
+const drop = $('#drop');
+const list = $('#list');
+const all = $('#all');
+const copyAll = $('#copyAll');
+const dlHtml = $('#downloadHtml');
+const mimeSel = $('#mime');
+const resizeChk = $('#resizeChk');
+const wEl = $('#w');
+const hEl = $('#h');
+const qEl = $('#q');
+
+resizeChk.addEventListener('change',()=>{
+  wEl.disabled = hEl.disabled = !resizeChk.checked;
+});
+
+pickBtn.addEventListener('click',()=> fileInput.click());
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault();drop.classList.add('drag');}));
+;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{e.preventDefault();drop.classList.remove('drag');}));
+
+drop.addEventListener('drop', e=>{
+  const files = [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+  handleFiles(files);
+});
+
+$('#clear').addEventListener('click',()=>{ list.innerHTML=''; all.value=''; });
+$('#reset').addEventListener('click', () => location.reload());
+copyAll.addEventListener('click',()=>{ all.select(); document.execCommand('copy'); copyAll.innerHTML='<i class="fas fa-check"></i> Đã copy'; setTimeout(()=>copyAll.innerHTML='<i class="fas fa-copy"></i> Copy tất cả',1200);});
+
+dlHtml.addEventListener('click',()=>{
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Base64 Images</title></head><body>\n${all.value}\n</body></html>`;
+  const blob = new Blob([html],{type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'base64-images.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+async function handleFiles(files){
+  for(const f of files){
+    const dataUrl = await fileToDataURL(f, mimeSel.value || undefined);
+    renderItem(f, dataUrl);
+  }
+  rebuildAll();
+}
+
+function fileToDataURL(file, forceType){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = async e => {
+      let src = e.target.result; // as dataURL
+      if(forceType || resizeChk.checked){
+        try{ src = await transformDataURL(src, forceType); }
+        catch(err){ console.error(err); }
+      }
+      resolve(src);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function transformDataURL(dataUrl, forceType){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if(resizeChk.checked){
+        const W = parseInt(wEl.value||w,10), H = parseInt(hEl.value||h,10);
+        if(W && !H){ h = Math.round(img.naturalHeight * (W / img.naturalWidth)); w = W; }
+        else if(H && !W){ w = Math.round(img.naturalWidth * (H / img.naturalHeight)); h = H; }
+        else if(W && H){ w = W; h = H; }
+      }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      const q = Math.min(1, Math.max(0.01, (parseInt(qEl.value,10)||92)/100));
+      const type = forceType || dataUrl.split(';').replace('data:','');
+      try{ resolve(canvas.toDataURL(type, q)); }
+      catch(err){ reject(err); }
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+function renderItem(file, dataUrl){
+  const el = document.createElement('div');
+  el.className='item';
+  el.innerHTML = `
+    <img class="thumb" alt="thumb" />
+    <div>
+      <div class="row" style="justify-content:space-between;gap:8px">
+        <div class="small">${escapeHtml(file.name)} · ${(file.size/1024).toFixed(1)} KB → ${(Math.ceil((dataUrl.length*3/4)/1024)).toLocaleString()} KB</div>
+        <button class="btn ghost" data-action="copy">Copy &lt;img&gt;</button>
+        <button class="btn ghost" data-action="copyurl">Copy data URL</button>
+      </div>
+      <textarea spellcheck="false"></textarea>
+    </div>`;
+  const img = el.querySelector('img');
+  img.src = dataUrl;
+  const ta = el.querySelector('textarea');
+  const tag = `<img src="${dataUrl}" alt="${escapeHtml(file.name)}" />`;
+  ta.value = tag;
+  el.querySelector('[data-action="copy"]').addEventListener('click',()=>{ ta.select(); document.execCommand('copy'); });
+  el.querySelector('[data-action="copyurl"]').addEventListener('click',()=>{ navigator.clipboard.writeText(dataUrl); });
+  list.appendChild(el);
+}
+
+function rebuildAll(){
+  const parts = [...list.querySelectorAll('textarea')].map(t=>t.value);
+  all.value = parts.join('\n');
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"]+/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]));
+}
+
+// Dropdown menu functionality
+let dropdownTimeout;
+const dropdown = document.querySelector('.dropdown');
+const dropdownMenu = document.getElementById('dropdown-menu');
+
+if (dropdown && dropdownMenu) {
+    dropdown.addEventListener('mouseenter', function() {
+        clearTimeout(dropdownTimeout);
+        dropdownMenu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        dropdownTimeout = setTimeout(function() {
+            dropdownMenu.classList.remove('show');
+        }, 200);
+    });
+
+    dropdownMenu.addEventListener('mouseenter', function() {
+        clearTimeout(dropdownTimeout);
+    });
+
+    dropdownMenu.addEventListener('mouseleave', function() {
+        dropdownTimeout = setTimeout(function() {
+            dropdownMenu.classList.remove('show');
+        }, 200);
+    });
+}
+</script>
+</body>
+</html>
