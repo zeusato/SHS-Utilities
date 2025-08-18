@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="Source/Thumb.png">
+    <link rel="icon" href="Source/LOGO.png" type="image/png">
+    <title>Email Builder – Inline HTML (1200px)</title>
+    <style>
+        :root{--bg:#fff;--panel:#f9fafb;--muted:#6b7280;--text:#111827;--brand:#4f8cff;--line:#e5e7eb}
+        *{box-sizing:border-box}
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell',sans-serif;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh;
+            margin:0;
+            padding:2rem;
+        }
+        .header{
+            width:100%;
+            max-width:1200px;
+            background:#FFFFFF;
+            backdrop-filter:blur(10px);
+            padding:1rem 2rem;
+            box-shadow:0 2px 20px rgba(0,0,0,0.1);
+            border-radius:16px 16px 0 0;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin: 0 auto;
+        }
+        .logo{display:flex;align-items:center;gap:0.5rem;text-decoration:none}
+        .logo img{height:40px;width:auto}
+        .logo-text{font-size:1.5rem;font-weight:700;color:#ff8700}
+        .back-btn{background:#10a37f;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;font-weight:500;transition:background .3s ease}
+        .back-btn:hover{background:#1a7f64}
+        .main-content{
+            background:white;
+            border-radius:0 0 16px 16px;
+            padding:2rem;
+            box-shadow:0 10px 30px rgba(0,0,0,0.1);
+            width:100%;
+            max-width:1200px;
+            margin: 0 auto;
+        }
+        .wrap{max-width:1200px;margin:0 auto;padding:0}
+        h1{margin:0 0 10px;font-size:20px}
+        .grid{display:grid;gap:16px}
+        .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+        .card-head{padding:16px 16px 0}
+        .card-body{padding:16px}
+        .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+        label{font-size:14px;color:var(--muted)}
+        .input,textarea,select{background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px; width: 100%;}
+        .input[type="file"]{padding:8px;background:#f9fafb}
+        textarea{min-height:180px;width:100%;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+        .btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+        .btn.primary{background:var(--brand);color:#fff}
+        .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+        .muted{color:var(--muted);font-size:12px}
+        .two{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+        @media (max-width:980px){.two{grid-template-columns:1fr}}
+        iframe{width:100%;height:580px;border:1px solid var(--line);border-radius:10px;background:#fff}
+        .switch{display:flex;gap:8px;align-items:center}
+        .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
+        .right{display:flex;gap:8px;justify-content:flex-end}
+        .hr{height:1px;background:var(--line);margin:8px 0}
+    </style>
+    <!-- Quill WYSIWYG -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>.ql-container{background:#fff;border-radius:8px}.ql-toolbar{border-radius:8px 8px 0 0}.ql-editor{min-height:220px;color:#000}</style>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">
+            <img src="Source/1. Logo.jpg" alt="Logo">
+            <span class="logo-text">Utilities</span>
+        </a>
+        <a href="index.html" class="back-btn">← Quay lại</a>
+    </header>
+    <div class="main-content">
+        <div class="wrap grid">
+            <div class="card card-head">
+                <h1>⚒️ Email Builder</h1>
+                <p class="muted">Nhập nội dung → tool tự dàn vào template 1200px, inline style. Ảnh header/footer nếu chọn sẽ tự convert sang <span class="pill"><code>data:image/*;base64,...</code></span>. Có thể <b>Preview</b> và <b>Tải .html</b>.</p>
+            </div>
+            <div class="two">
+                <!-- Left: controls -->
+                <div class="card card-body grid">
+                    <div class="grid" style="gap:10px">
+                        <div class="row"><label style="min-width:120px">Tiêu đề email (tiêu đề ở thân, không phải subject)</label><input id="title" class="input" placeholder="Ví dụ: Khuyến mãi tháng 8 – Senergy"/></div>
+                        <div class="row"><label style="min-width:120px">Preheader (ẩn)</label><input id="preheader" class="input" placeholder="Dòng mô tả ngắn hiển thị cùng subject trong inbox"/></div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="grid" style="gap:10px">
+                        <div class="switch"><input type="checkbox" id="useHeader"/> <label for="useHeader"><b>Dùng Header</b> (ảnh)</label></div>
+                        <div class="row" id="headerRow" style="display:none">
+                            <input id="headerFile" type="file" class="input" accept="image/*"/>
+                            <span class="muted">Ảnh sẽ được nhúng base64, nên ưu tiên < 200KB</span>
+                        </div>
+                    </div>
+                    <div class="grid" style="gap:10px">
+                        <div class="switch"><input type="checkbox" id="useFooter"/> <label for="useFooter"><b>Dùng Footer</b> (ảnh)</label></div>
+                        <div class="row" id="footerRow" style="display:none">
+                            <input id="footerFile" type="file" class="input" accept="image/*"/>
+                            <span class="muted">Tuỳ chọn: logo/địa chỉ, bản quyền...</span>
+                        </div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="grid" style="gap:8px">
+                        <label><b>Nội dung</b> – soạn thảo như Word (bold, list, link...)</label>
+                        <div id="editorToolbar"></div>
+                        <div id="editor"></div>
+                        <p class="muted">Mẹo: Dán từ Word/Docs rồi chỉnh lại; ảnh trong nội dung nên hạn chế hoặc dùng link/CDN.</p>
+                    </div>
+                    <div class="row right">
+                        <button class="btn ghost" id="copyHtml">Copy HTML</button>
+                        <button class="btn primary" id="buildBtn">Build & Preview</button>
+                        <button class="btn ghost" id="downloadBtn">Tải .html</button>
+                    </div>
+                </div>
+                <!-- Right: preview + html output -->
+                <div class="card card-body grid" style="gap:8px;justify-content:space-between;align-items:flex-start;align-content:flex-start">
+                    <div class="row" style="justify-content:space-between;align-items:flex-start;align-content:flex-start">
+                        <div>
+                            <div class="pill">Template: 1200px · table layout · inline CSS</div>
+                            <div class="muted" id="sizeInfo"></div>
+                        </div>
+                        <button class="btn ghost" id="toggleHtml">Hiện mã HTML</button>
+                    </div>
+                    <iframe id="preview"></iframe>
+                    <textarea id="htmlOut" style="display:none"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+let quill;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const toolbarOpts = [
+    [{ header: [1, 2, false] }],
+    ['bold','italic','underline'],
+    [{ list:'ordered' }, { list:'bullet' }],
+    ['link','clean']
+  ];
+  quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: toolbarOpts } });
+});
+
+const $ = s => document.querySelector(s);
+const byId = id => document.getElementById(id);
+
+// Gán sự kiện cho các nút
+byId('buildBtn').addEventListener('click', buildAndPreview);
+byId('copyHtml').addEventListener('click', copyHtml);
+byId('downloadBtn').addEventListener('click', downloadHtml);
+byId('toggleHtml').addEventListener('click', () => {
+  const preview = byId('preview');
+  const htmlOut = byId('htmlOut');
+  const isHtmlVisible = htmlOut.style.display === 'block';
+  preview.style.display = isHtmlVisible ? 'block' : 'none';
+  htmlOut.style.display = isHtmlVisible ? 'none' : 'block';
+  byId('toggleHtml').textContent = isHtmlVisible ? 'Hiện mã HTML' : 'Hiện Preview';
+});
+
+const state = { headerDataUrl: '', footerDataUrl: '' };
+
+byId('useHeader').addEventListener('change', (e) => {
+  byId('headerRow').style.display = e.target.checked ? 'flex' : 'none';
+});
+byId('useFooter').addEventListener('change', (e) => {
+  byId('footerRow').style.display = e.target.checked ? 'flex' : 'none';
+});
+
+byId('headerFile').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files;
+  state.headerDataUrl = f ? await toBase64(f) : '';
+});
+byId('footerFile').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files;
+  state.footerDataUrl = f ? await toBase64(f) : '';
+});
+
+function escapeHtml(s=''){
+  return s.replace(/[&<>]/g, m=> ({'&':'&','<':'<','>':'>'}[m]));
+}
+
+function getEditorHtml(){
+  if(!quill) return '';
+  return quill.root.innerHTML || '';
+}
+
+function emailHtml({title, preheader, bodyHtml, headerDataUrl, footerDataUrl}){
+  const headerImg = headerDataUrl ? `<tr><td><img src="${headerDataUrl}" alt="header" width="1200" style="width:100%; height:auto; display:block; border:0"></td></tr>` : '';
+  const footerImg = footerDataUrl ? `<tr><td><img src="${footerDataUrl}" alt="footer" width="1200" style="width:100%; height:auto; display:block; border:0"></td></tr>` : '';
+  const titleRow = title ? `<tr><td style="padding:16px 24px; background:#111827; color:#fff; font-family:Arial,Helvetica,sans-serif; font-size:12px;">${escapeHtml(title)}</td></tr>` : '';
+
+  return `<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title||'Email')}</title>
+<style>img{border:0;outline:none;text-decoration:none} table{border-collapse:collapse}</style>
+</head>
+<body style="margin:0; padding:0; background:#f3f4f6;">
+<div style="display:none; overflow:hidden; line-height:1px; opacity:0; max-height:0; max-width:0; mso-hide:all;">${escapeHtml(preheader||'')}</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f3f4f6;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="1200" style="width:100%; max-width:1200px; background:#ffffff; border-radius:8px; overflow:hidden;">
+        ${titleRow}
+        ${headerImg}
+        <tr>
+          <td style="padding:20px 24px; font-family:Arial,Helvetica,sans-serif; white-space: pre-wrap;">
+            ${bodyHtml}
+          </td>
+        </tr>
+        ${footerImg}
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
+async function toBase64(file){
+  if(!file) return '';
+  const okTypes = ['image/png','image/jpeg','image/webp','image/gif','image/svg+xml'];
+  if(!okTypes.includes(file.type)){
+    alert('Chỉ nhận ảnh PNG/JPEG/WEBP/GIF/SVG');
+    return '';
+  }
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function buildAndPreview(){
+  const title = byId('title').value.trim();
+  const preheader = byId('preheader').value.trim();
+  const bodyHtml = getEditorHtml();
+  const html = emailHtml({title, preheader, bodyHtml, headerDataUrl: state.headerDataUrl, footerDataUrl: state.footerDataUrl});
+  byId('htmlOut').value = html;
+  const blob = new Blob([html],{type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const iframe = byId('preview');
+  iframe.src = url;
+  byId('sizeInfo').textContent = `Kích thước HTML: ${(html.length/1024).toFixed(1)} KB`;
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+}
+
+function downloadHtml(){
+  const html = byId('htmlOut').value || (buildAndPreview(), byId('htmlOut').value);
+  const blob = new Blob([html],{type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'email-inline.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 10000);
+}
+
+async function copyHtml(){
+  const html = byId('htmlOut').value || (buildAndPreview(), byId('htmlOut').value);
+  try{ await navigator.clipboard.writeText(html); alert('Đã copy HTML vào clipboard'); }
+  catch{ const ta = byId('htmlOut'); ta.style.display='block'; ta.select(); document.execCommand('copy'); alert('Đã copy (fallback)'); }
+}
+</script>
+</body>
+</html>
