@@ -15,9 +15,10 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
         }
 
         /* Header */
@@ -244,58 +245,85 @@
         }
 
         /* Main Content */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 4rem 2rem;
         }
 
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .features-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
         .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            color: white;
-            margin-bottom: 3rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: inline-block;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
         }
 
         .feature-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             text-decoration: none;
             color: inherit;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
         }
 
         .feature-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #667eea;
         }
 
         .feature-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #495057;
         }
 
         .feature-description {
-            color: #666;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            color: #6c757d;
+            flex-grow: 1;
         }
 
         /* Footer */
@@ -359,28 +387,6 @@
             }
 
             .banner > div {
-                flex-direction: column !important;
-                gap: 1rem !important;
-            }
-        }
-
-        /* Styles for Translation Popup */
-        #open-translate-popup-btn {
-            font-weight: 500;
-            color: #333;
-            transition: color 0.3s ease;
-            cursor: pointer;
-        }
-        #open-translate-popup-btn:hover {
-            color: #10a37f;
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
             z-index: 1000;
             justify-content: center;
@@ -668,122 +674,109 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <h2 class="section-title">🚀 Các tính năng của chúng tôi</h2>
+        <h2 class="section-title">🌟 Các tính năng của chúng tôi:</h2>
         
-        <div class="features-grid">
-            <a href="pdf-editor.html" class="feature-card">
-                <div class="feature-icon">📝</div>
-                <h3 class="feature-title">PDF Editor</h3>
-                <p class="feature-description">
-                    Chỉnh sửa file PDF và ảnh trực quan. Hỗ trợ crop, xoay, sắp xếp trang,
-                    chèn thêm trang và xuất PDF với nhiều tùy chọn nâng cao.
-                </p>
-            </a>
-            
-            <a href="image-to-pdf-scanner.html" class="feature-card">
-                <div class="feature-icon">📄</div>
-                <h3 class="feature-title">Chuyển đổi ảnh thành PDF</h3>
-                <p class="feature-description">
-                    Chuyển ảnh thường thành file PDF scan chuyên nghiệp. Hỗ trợ batch upload,
-                    tự động căn chỉnh và tạo PDF với giao diện như máy scan thật.
-                </p>
-            </a>
-            
-            <a href="excel-cleaner.html" class="feature-card">
-                <div class="feature-icon">🗑️</div>
-                <h3 class="feature-title">Dọn rác file Excel</h3>
-                <p class="feature-description">
-                    Làm sạch file Excel có dung lượng lớn bất thường. Tự động loại bỏ dữ liệu thừa,
-                    named ranges lỗi thời, broken links và xuất file tối ưu.
-                </p>
-            </a>
-            
-            <a href="cccd-generator.html" class="feature-card">
-                <div class="feature-icon">🖼️</div>
-                <h3 class="feature-title">Resize ảnh CCCD/Hộ chiếu</h3>
-                <p class="feature-description">
-                    Tạo ảnh CCCD chuẩn từ ảnh chân dung thường. Tự động căn chỉnh khuôn mặt,
-                    đổi nền và xuất ảnh đúng kích thước theo tiêu chuẩn.
-                </p>
-            </a>
-            
-            <a href="url-shortener.html" class="feature-card">
-                <div class="feature-icon">🔗</div>
-                <h3 class="feature-title">Rút gọn Link</h3>
-                <p class="feature-description">
-                    Cho phép người dùng nhập một URL bất kỳ và nhận lại phiên bản rút gọn thông qua API của shrtco.de.
-                    Hỗ trợ thao tác sao chép nhanh và hiển thị thông báo xác nhận.
-                </p>
-            </a>
+        <div class="container">
+        <!-- Image & PDF Processing Tools -->
+        <section class="features-section">
+            <h2 class="section-title">🖼️ Công cụ xử lý hình ảnh & PDF</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3 class="feature-title">PDF Editor</h3>
+                    <p class="feature-description">Chỉnh sửa PDF và ảnh trực quan.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h3 class="feature-title">Chuyển đổi ảnh thành PDF</h3>
+                    <p class="feature-description">Tạo PDF scan từ ảnh, batch upload.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Image to Base64</h3>
+                    <p class="feature-description">Chuyển ảnh sang Base64, kéo thả hỗ trợ.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3 class="feature-title">Tạo Bảng Màu Từ Ảnh</h3>
+                    <p class="feature-description">Tạo bảng màu đẹp từ ảnh của bạn.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3 class="feature-title">Resize ảnh CCCD/Hộ chiếu</h3>
+                    <p class="feature-description">Tạo ảnh chuẩn từ ảnh chân dung.</p>
+                </div>
+            </div>
+        </section>
 
-            <a href="random-spinner.html" class="feature-card">
-                <div class="feature-icon">🌀</div>
-                <h3 class="feature-title">Vòng Quay May Mắn</h3>
-                <p class="feature-description">
-                    Tạo vòng quay may mắn từ danh sách hoặc quay số ngẫu nhiên trong một khoảng nhất định.
-                </p>
-            </a>
-            
-            <a href="QR-in.html" class="feature-card">
-                <div class="feature-icon">💳</div>
-                <h3 class="feature-title">Tạo QR nhận tiền</h3>
-                <p class="feature-description">
-                    Tạo mã QR chuyển khoản nhanh chóng và tiện lợi. Hỗ trợ tất cả các ngân hàng
-                    tại Việt Nam với giao diện thân thiện và lưu thông tin tự động.
-                </p>
-            </a>
-            
-            <a href="ocr-extract.html" class="feature-card">
-                <div class="feature-icon">🧩</div>
-                <h3 class="feature-title">Trích xuất văn bản từ ảnh</h3>
-                <p class="feature-description">
-                    Trích xuất văn bản từ file ảnh hoặc PDF (tối đa 3 trang) sử dụng công nghệ OCR.
-                    Hỗ trợ xem trước, sắp xếp và xuất ra file DOCX.
-                </p>
-            </a>
-            <a href="qr-generator.html" class="feature-card">
-                <div class="feature-icon">🔳</div>
-                <h3 class="feature-title">Tạo QR Đa Dụng</h3>
-                <p class="feature-description">
-                    Tạo mã QR cho link, Vcard, Wi-Fi với nhiều tùy chọn tùy chỉnh màu sắc, logo và style.
-                </p>
-            </a>
-            <a href="extract-video.html" class="feature-card">
-                <div class="feature-icon">🎥</div>
-                <h3 class="feature-title">Tách Hình / Tiếng Từ Video</h3>
-                <p class="feature-description">
-                    Tách audio và video từ file video. Xuất ra file MP3 hoặc video không có âm thanh.
-                </p>
-            </a>
-            <a href="Color Palette.html" class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3 class="feature-title">Tạo Bảng Màu Từ Ảnh</h3>
-                <p class="feature-description">
-                    Tải ảnh lên, chọn một màu và khám phá các bảng màu tuyệt đẹp được tạo từ ảnh của bạn.
-                </p>
-<a href="IMG2Base64.html" class="feature-card">
-                <div class="feature-icon">🔄</div>
-                <h3 class="feature-title">Image to Base64</h3>
-                <p class="feature-description">
-                    Chuyển đổi hình ảnh sang mã Base64 để nhúng trực tiếp vào HTML hoặc CSS. Hỗ trợ kéo và thả nhiều tệp.
-                </p>
-            </a>
-<a href="Mail template.html" class="feature-card">
-                <div class="feature-icon">✉️</div>
-                <h3 class="feature-title">Mail Template Builder</h3>
-                <p class="feature-description">
-                    Tạo nhanh email HTML với template 1200px, tự động inline style, nhúng ảnh header/footer dưới dạng base64.
-                </p>
-            </a>
-            </a>
-            <!-- <a href="audio-tools.html" class="feature-card">
-                <div class="feature-icon">🎧</div>
-                <h3 class="feature-title">Ghép / Cắt Âm Thanh</h3>
-                <p class="feature-description">
-                    Ghép nhiều file audio thành một hoặc cắt một đoạn âm thanh từ file.
-                </p>
-            </a> -->
-        </div>
+        <!-- Text & Data Processing Tools -->
+        <section class="features-section">
+            <h2 class="section-title">📝 Công cụ xử lý văn bản & dữ liệu</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔤</div>
+                    <h3 class="feature-title">Trích xuất văn bản từ ảnh</h3>
+                    <p class="feature-description">OCR từ ảnh hoặc PDF, xuất ra DOCX.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗑️</div>
+                    <h3 class="feature-title">Dọn rác file Excel</h3>
+                    <p class="feature-description">Làm sạch file Excel, tối ưu dung lượng.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3 class="feature-title">Rút gọn Link</h3>
+                    <p class="feature-description">Rút gọn URL nhanh chóng qua API.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✉️</div>
+                    <h3 class="feature-title">Mail Template Builder</h3>
+                    <p class="feature-description">Tạo email HTML chuyên nghiệp.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- QR Code & CCCD Tools -->
+        <section class="features-section">
+            <h2 class="section-title">🔳 Công cụ QR Code & CCCD</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔳</div>
+                    <h3 class="feature-title">Tạo QR Đa Dụng</h3>
+                    <p class="feature-description">QR cho link, Vcard, Wi-Fi với tùy chỉnh.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💳</div>
+                    <h3 class="feature-title">Tạo QR nhận tiền</h3>
+                    <p class="feature-description">QR chuyển khoản nhanh cho ngân hàng VN.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multimedia Tools -->
+        <section class="features-section">
+            <h2 class="section-title">🎥 Công cụ đa phương tiện</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎥</div>
+                    <h3 class="feature-title">Tách Hình / Tiếng Từ Video</h3>
+                    <p class="feature-description">Tách audio/video, xuất MP3 hoặc không âm thanh.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Utilities -->
+        <section class="features-section">
+            <h2 class="section-title">🌀 Tiện ích khác</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌀</div>
+                    <h3 class="feature-title">Vòng Quay May Mắn</h3>
+                    <p class="feature-description">Tạo vòng quay ngẫu nhiên từ danh sách.</p>
+                </div>
+            </div>
+        </section>
+    </div>
     </main>
 
     <!-- Footer -->
